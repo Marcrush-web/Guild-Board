@@ -162,6 +162,9 @@ button:focus-visible,.card:focus-visible,.chip:focus-visible,.room-card:focus-vi
   border:1px solid rgba(232,179,60,.4);padding:2px 9px;border-radius:20px;margin-top:-2px;white-space:nowrap}
 .session-btn{border-color:rgba(232,179,60,.5);color:#F0DFAE}
 .session-btn:hover{background:rgba(232,179,60,.18)}
+.session-btn.paused{border-color:rgba(63,191,143,.55);color:#9EEBC9;background:rgba(63,191,143,.12);animation:pausedpulse 2s ease-in-out infinite}
+.session-btn.paused:hover{background:rgba(63,191,143,.24)}
+@keyframes pausedpulse{0%,100%{box-shadow:0 0 0 rgba(63,191,143,0)}50%{box-shadow:0 0 14px -2px rgba(63,191,143,.6)}}
 .gems{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:1px}
 .gem{width:9px;height:9px;background:rgba(46,33,83,.14);clip-path:polygon(50% 0,100% 35%,82% 100%,18% 100%,0 35%);transition:.2s}
 .gem.on{background:linear-gradient(180deg,var(--gold-lite),var(--ember));box-shadow:0 0 7px rgba(255,140,60,.8)}
@@ -312,7 +315,7 @@ button:focus-visible,.card:focus-visible,.chip:focus-visible,.room-card:focus-vi
 .empty h3{font-family:'Mitr',sans-serif;font-weight:500;margin:0 0 6px;color:var(--gold-lite)}
 .empty p{margin:0 0 16px;color:#A79BD6;font-size:14px}
 
-.mask{position:fixed;inset:0;z-index:1000;background:rgba(8,5,22,.82);backdrop-filter:blur(6px);display:none;place-items:center;padding:16px;overflow-y:auto}
+.mask{position:fixed;inset:0;z-index:1400;background:rgba(8,5,22,.82);backdrop-filter:blur(6px);display:none;place-items:center;padding:16px;overflow-y:auto}
 .mask.show{display:grid}
 .modal{width:min(560px,100%);background:linear-gradient(180deg,#2B1D5C,#1A1240);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 70px rgba(0,0,0,.7);padding:22px;animation:rise .25s ease}
 @keyframes rise{from{transform:translateY(22px);opacity:0}to{transform:none;opacity:1}}
@@ -364,6 +367,8 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
 
 /* ══ ปุ่ม Admin บนแท็บ ══ */
 .admin-tab{padding:8px 14px;font-size:13px;border-color:rgba(232,179,60,.4);color:#F0DFAE;white-space:nowrap}
+#btnCheckwork{border-color:rgba(155,123,255,.45);color:#D6C9FF;background:rgba(155,123,255,.1)}
+#btnCheckwork:hover{background:rgba(155,123,255,.22)}
 .admin-tab:hover{background:rgba(232,179,60,.2)}
 .admin-badge{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:#9EEBC9;
   background:rgba(63,191,143,.16);border:1px solid rgba(63,191,143,.4);padding:7px 12px;border-radius:20px;white-space:nowrap}
@@ -516,6 +521,7 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
     <button class="iconbtn hide" id="btnFull" title="เต็มจอ">⛶</button>
     <button class="iconbtn syncbtn hide" id="btnSync" title="สถานะซิงก์ขึ้นคลาวด์">☁️<span class="dot off" id="syncDot"></span></button>
     <span class="admin-badge hide" id="adminBadge">🛡️ โหมดแอดมิน</span>
+    <button class="btn admin-tab" id="btnCheckwork" title="เปิดระบบเช็คงานนักเรียน (แท็บใหม่)">📋 เช็คงาน</button>
     <button class="btn admin-tab hide" id="btnAdminLogout" title="ออกจากระบบแอดมิน">🚪 ออกจากระบบ</button>
     <button class="btn admin-tab" id="btnAdminOpen" title="เข้าสู่ระบบ Admin">🔑 Admin</button>
     <button class="iconbtn" id="btnSound" title="เปิด/ปิดเสียง">🔊</button>
@@ -651,11 +657,11 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
 <div class="draw" id="sessionOverlay">
   <div class="draw-inner" style="max-width:560px">
     <div class="draw-title">🔔 สรุปคะแนนคาบนี้ — <span id="sessionRoomName"></span></div>
-    <p class="sub" style="margin:0 0 16px;color:#C9BDF2">เรียงตามชื่อ ก-ฮ ไล่บอกนักเรียนเพื่อปั๊มดาวในสมุดได้เลย</p>
+    <p class="sub" style="margin:0 0 16px;color:#C9BDF2">เรียงตามชื่อ ก-ฮ ไล่บอกนักเรียนเพื่อปั๊มดาวในสมุดได้เลย<br>กดปิดคาบแล้วตัวเลขจะค้างไว้ให้ดู ไม่รีเซ็ตจนกว่าจะกด "เริ่มคาบนี้" ครั้งถัดไป</p>
     <div class="session-list" id="sessionList"></div>
     <div class="draw-actions">
       <button class="btn ghost" id="btnSessionCancel">ปิดหน้าต่างนี้</button>
-      <button class="btn gold" id="btnSessionConfirm">✅ ปิดคาบ &amp; เริ่มคาบใหม่</button>
+      <button class="btn gold" id="btnSessionConfirm">✅ ปิดคาบนี้</button>
     </div>
   </div>
 </div>
@@ -893,6 +899,8 @@ const SUPABASE_ANON_KEY = "sb_publishable_4GuZS5at0hzoXrBtLoPRpg_raUIqsA1";
 /* อีเมลผูกบัญชี Admin ที่สร้างไว้ใน Supabase Authentication → Users
    ใส่ตรงนี้ครั้งเดียว — ผู้ใช้จะไม่เห็นอีเมลนี้เลย เห็นแค่ "เข้าสู่ระบบ Admin" */
 const ADMIN_EMAIL = "admin@guildboard.app";
+/* ลิงก์ระบบเช็คงานนักเรียน (GitHub Pages) — แก้ตรงนี้ได้ถ้าเปลี่ยนลิงก์ในอนาคต */
+const CHECKWORK_URL = "https://marcrush-web.github.io/worksheet1122/";
 let sb = null;
 let appRole = "student"; // "student" = โหมดดูอย่างเดียว, "teacher" = โหมดหลังบ้าน
 let studentClassId = null, rtChannel = null, boardBackTarget = "student";
@@ -925,6 +933,7 @@ const esc = s => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">"
 function normalizeDB(db){
   db.classes.forEach((c,i) => {
     if(!c.icon) c.icon = ROOM_ICONS[i % ROOM_ICONS.length];
+    if(typeof c.sessionActive !== "boolean") c.sessionActive = true;
     c.students.forEach(s => { if(typeof s.sessionPts !== "number") s.sessionPts = 0; });
   });
   return db;
@@ -1366,6 +1375,7 @@ function render(){
   if(view === "lobby"){ renderLobby(); return; }
   if(!activeClass()){ goLobby(); return; }
   renderClassSel();
+  updateSessionButton();
   if(mode === "group"){ renderGroups(); renderGroupBoard(); }
   else{ renderGrid(); renderBoard(); }
   renderStats(); renderLog();
@@ -1532,7 +1542,7 @@ function addPoints(id, amount, ev){
   const st = cls.students.find(s => s.id === id); if(!st) return;
   const before = levelOf(st.points).lv, oldP = st.points, oldS = st.sessionPts;
   st.points = Math.max(0, st.points + amount);
-  st.sessionPts = Math.max(0, st.sessionPts + amount);
+  if(cls.sessionActive !== false) st.sessionPts = Math.max(0, st.sessionPts + amount);
   const real = st.points - oldP;
   if(real === 0){ toast("แต้มต่ำสุดคือ 0 แล้ว"); return; }
   pushUndo({classId:cls.id, changes:[{id, dp:real, ds:st.sessionPts-oldS}], groups:[], label:`${real>0?"+":""}${real} ของ ${st.name}`});
@@ -1565,7 +1575,7 @@ function addGroupPoints(gid, amount, ev){
     const s = byId.get(id); if(!s) return;
     const oldP = s.points, oldS = s.sessionPts;
     s.points = Math.max(0, s.points + amount);
-    s.sessionPts = Math.max(0, s.sessionPts + amount);
+    if(cls.sessionActive !== false) s.sessionPts = Math.max(0, s.sessionPts + amount);
     if(s.points !== oldP || s.sessionPts !== oldS) changes.push({id, dp: s.points-oldP, ds: s.sessionPts-oldS});
   });
   if(changes.length === 0){ toast("แต้มต่ำสุดคือ 0 แล้ว"); return; }
@@ -2113,7 +2123,7 @@ $("#btnRoomSave").addEventListener("click", () => {
     render(); save(); toast("บันทึกห้องเรียนแล้ว");
   }else{
     const names = $("#roomStudents").value.split("\n").map(s => s.trim()).filter(Boolean);
-    const c = {id:uid(), name:nm, icon:roomIcon,
+    const c = {id:uid(), name:nm, icon:roomIcon, sessionActive:true,
       students: names.map(n => ({id:uid(), name:n, points:0, sessionPts:0, avatar:AVATARS[Math.floor(Math.random()*AVATARS.length)]}))};
     DB.classes.push(c);
     $("#mRoom").classList.remove("show");
@@ -2136,10 +2146,33 @@ $("#search").addEventListener("input", e => { query = e.target.value.trim().toLo
 $("#sortSel").addEventListener("change", e => { sortBy = e.target.value; clearFreeze(); renderGrid(); });
 $("#btnUndo").addEventListener("click", undo);
 
-/* ══════════ ปิดคาบนี้ / สรุปคะแนนคาบนี้ ══════════ */
+/* ══════════ เริ่ม/ปิดคาบนี้ (ปุ่ม toggle) ══════════ */
+function updateSessionButton(){
+  const cls = activeClass(); if(!cls) return;
+  const btn = $("#btnEndSession");
+  if(cls.sessionActive === false){
+    btn.textContent = "▶️ เริ่มคาบนี้";
+    btn.title = "เริ่มนับคะแนนคาบใหม่ (รีเซ็ตตัวเลขคาบนี้เป็น 0)";
+    btn.classList.add("paused");
+  }else{
+    btn.textContent = "🔔 ปิดคาบนี้";
+    btn.title = "ดูสรุปคะแนนคาบนี้แล้วปิดคาบ";
+    btn.classList.remove("paused");
+  }
+}
 $("#btnEndSession").addEventListener("click", () => {
   const cls = activeClass(); if(!cls) return;
   if(cls.students.length === 0){ toast("ห้องนี้ยังไม่มีนักเรียน"); return; }
+
+  if(cls.sessionActive === false){
+    // ปิดคาบอยู่ -> กดเพื่อเริ่มคาบใหม่ทันที (รีเซ็ตตัวเลขคาบนี้เป็น 0 แล้วเริ่มนับ)
+    cls.students.forEach(s => s.sessionPts = 0);
+    cls.sessionActive = true;
+    updateSessionButton(); render(); save();
+    toast("🔔 เริ่มคาบใหม่แล้ว เริ่มนับคะแนนคาบนี้ตั้งแต่ตอนนี้");
+    return;
+  }
+  // คาบกำลังทำงานอยู่ -> เปิดหน้าสรุปให้ดูก่อนปิด
   $("#sessionRoomName").textContent = cls.name;
   const sorted = [...cls.students].sort((a,b) => a.name.localeCompare(b.name,"th"));
   $("#sessionList").innerHTML = sorted.map(s => `
@@ -2150,15 +2183,12 @@ $("#btnEndSession").addEventListener("click", () => {
   $("#sessionOverlay").classList.add("show");
 });
 $("#btnSessionCancel").addEventListener("click", () => $("#sessionOverlay").classList.remove("show"));
-$("#btnSessionConfirm").addEventListener("click", async () => {
+$("#btnSessionConfirm").addEventListener("click", () => {
   const cls = activeClass(); if(!cls) return;
-  const ok = await showConfirm("ตัวเลข \"คาบนี้\" ของทุกคนจะรีเซ็ตเป็น 0 (คะแนนสะสมไม่กระทบ) เริ่มนับคาบใหม่ทันที",
-    {title:"ปิดคาบและเริ่มคาบใหม่?", yesLabel:"ปิดคาบ", danger:false, icon:"🔔"});
-  if(!ok) return;
-  cls.students.forEach(s => s.sessionPts = 0);
+  cls.sessionActive = false;
   $("#sessionOverlay").classList.remove("show");
-  render(); save();
-  toast("ปิดคาบแล้ว เริ่มนับคาบใหม่ให้ทุกคนเป็น 0");
+  updateSessionButton(); render(); save();
+  toast("ปิดคาบแล้ว ตัวเลข \"คาบนี้\" ค้างไว้ให้ดู จนกว่าจะกดเริ่มคาบใหม่");
 });
 $("#btnUndo2").addEventListener("click", undo);
 $("#btnBig").addEventListener("click", () => $("#grid").classList.toggle("big"));
@@ -2180,6 +2210,9 @@ function openAdmin(){
   setTimeout(() => $("#gatePass").focus(), 100);
 }
 $("#btnAdminOpen").addEventListener("click", openAdmin);
+$("#btnCheckwork").addEventListener("click", () => {
+  window.open(CHECKWORK_URL, "_blank", "noopener,noreferrer");
+});
 $("#btnGateLogin").addEventListener("click", async () => {
   if(!sb){ $("#gateErr").textContent = "ยังไม่ได้ตั้งค่า Supabase ในไฟล์นี้"; return; }
   const pass = $("#gatePass").value;
@@ -2326,6 +2359,7 @@ $("#btnReset").addEventListener("click", async () => {
   const ok = await showConfirm("รายชื่อยังอยู่ครบ", {title:`ล้างแต้มของทุกคนในห้อง "${cls.name}" ให้เป็น 0?`});
   if(!ok) return;
   cls.students.forEach(s => { s.points = 0; s.sessionPts = 0; });
+  cls.sessionActive = true;
   if(cls.groups) cls.groups.list.forEach(g => g.session = 0);
   undoStack = []; heistLog = []; render(); save(); toast("ล้างแต้มเรียบร้อย เริ่มเทอมใหม่ได้เลย");
 });
