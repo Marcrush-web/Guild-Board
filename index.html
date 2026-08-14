@@ -1,0 +1,2133 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>กิลด์ผู้กล้า — กระดานสะสมคริสตัล</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+:root{
+  --night:#150F30; --night2:#221646; --night3:#2E1F5E;
+  --parchment:#F6ECD6; --parchment2:#E7D8B6;
+  --ink:#2E2153; --ink-soft:#6B5B94;
+  --gold:#E8B33C; --gold-lite:#FFD97A;
+  --ember:#FF6B35; --emerald:#3FBF8F; --arcane:#9B7BFF;
+  --thief:#C46BFF;
+  --line:rgba(232,179,60,.22);
+  --radius:16px; --shadow:0 18px 40px -18px rgba(0,0,0,.85);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{
+  margin:0;min-height:100vh;overflow-x:hidden;
+  font-family:'IBM Plex Sans Thai','Sarabun',system-ui,sans-serif;color:#EFE9FF;
+  background:
+    radial-gradient(1000px 600px at 15% -10%, #3B2673 0%, transparent 60%),
+    radial-gradient(800px 500px at 90% 0%, #1E3A6B 0%, transparent 55%),
+    var(--night);
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(1.6px 1.6px at 12% 22%, rgba(255,255,255,.75) 50%, transparent 51%),
+    radial-gradient(1.4px 1.4px at 78% 12%, rgba(255,235,180,.7) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 42% 68%, rgba(255,255,255,.5) 50%, transparent 51%),
+    radial-gradient(1.8px 1.8px at 88% 62%, rgba(180,200,255,.65) 50%, transparent 51%),
+    radial-gradient(1.2px 1.2px at 28% 88%, rgba(255,255,255,.45) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 62% 38%, rgba(255,235,180,.5) 50%, transparent 51%);
+  animation:twinkle 6s ease-in-out infinite alternate;
+}
+@keyframes twinkle{from{opacity:.45}to{opacity:1}}
+.wrap{position:relative;z-index:1;max-width:1440px;margin:0 auto;padding:14px 16px 40px}
+.hide{display:none!important}
+
+.topbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 16px;margin-bottom:14px;
+  background:linear-gradient(180deg,rgba(46,31,94,.85),rgba(21,15,48,.7));
+  border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.brand{display:flex;align-items:center;gap:11px;margin-right:auto;min-width:0}
+.crest{width:44px;height:44px;flex:none;display:grid;place-items:center;font-size:22px;
+  background:radial-gradient(circle at 35% 30%,var(--gold-lite),var(--gold) 55%,#9C6F14);
+  color:#3A2607;border-radius:50% 50% 46% 46%/55% 55% 45% 45%;
+  box-shadow:0 0 22px rgba(232,179,60,.45), inset 0 -3px 6px rgba(0,0,0,.3)}
+.brand h1{font-family:'Mitr',sans-serif;font-weight:600;font-size:20px;margin:0;letter-spacing:.3px;
+  background:linear-gradient(180deg,#FFF3D0,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand small{display:block;font-size:11.5px;color:#A79BD6;font-weight:400;letter-spacing:.4px}
+
+select,input,textarea,button{font-family:inherit;font-size:14px}
+.field{background:rgba(255,255,255,.06);color:#F0EBFF;border:1px solid var(--line);border-radius:10px;padding:9px 12px;outline:none}
+.field:focus-visible{border-color:var(--gold);box-shadow:0 0 0 3px rgba(232,179,60,.25)}
+select.field{cursor:pointer}
+select.field option{background:#221646;color:#fff}
+.iconbtn{width:40px;height:40px;flex:none;display:grid;place-items:center;font-size:17px;cursor:pointer;
+  background:rgba(255,255,255,.06);border:1px solid var(--line);border-radius:11px;color:#EFE9FF;transition:transform .15s,background .15s}
+.iconbtn:hover{background:rgba(232,179,60,.18);transform:translateY(-2px)}
+.iconbtn.off{opacity:.4}
+button:focus-visible,.card:focus-visible,.chip:focus-visible,.room-card:focus-visible,.gcard:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.btn{cursor:pointer;border:1px solid var(--line);border-radius:11px;padding:9px 16px;font-weight:600;background:rgba(255,255,255,.06);color:#EFE9FF;transition:.15s}
+.btn:hover{background:rgba(232,179,60,.16);transform:translateY(-1px)}
+.btn.gold{background:linear-gradient(180deg,var(--gold-lite),var(--gold));color:#3A2607;border-color:transparent}
+.btn.gold:hover{filter:brightness(1.08)}
+.btn.ghost{background:transparent}
+.btn.danger{border-color:rgba(255,107,53,.5);color:#FFB699}
+.btn.danger:hover{background:rgba(255,107,53,.18)}
+.btn.on{background:linear-gradient(180deg,var(--gold-lite),var(--gold));color:#3A2607;border-color:transparent}
+.btn.thief{border-color:rgba(196,107,255,.55);color:#E4C4FF}
+.btn.thief:hover{background:rgba(196,107,255,.2)}
+.btn.thief.on{background:linear-gradient(180deg,#D89BFF,var(--thief));color:#2A0B45;border-color:transparent}
+.spacer{margin-left:auto}
+
+/* ══ หอกิลด์ ══ */
+.lobby-head{text-align:center;margin:26px 0 22px}
+.lobby-head h2{font-family:'Mitr',sans-serif;font-weight:500;font-size:24px;margin:0 0 6px;color:var(--gold-lite)}
+.lobby-head p{margin:0;color:#A79BD6;font-size:14px}
+.lobby-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(238px,1fr));gap:16px}
+.room-card{position:relative;cursor:pointer;text-align:left;padding:18px 16px 14px;overflow:hidden;
+  border:1px solid var(--line);border-radius:18px;color:#EFE9FF;font-family:inherit;
+  background:linear-gradient(165deg,rgba(62,42,124,.92),rgba(24,16,55,.92));
+  box-shadow:var(--shadow);transition:transform .18s cubic-bezier(.3,1.4,.5,1),box-shadow .18s}
+.room-card::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:18px;
+  background:radial-gradient(320px 120px at 80% -20%, rgba(232,179,60,.22), transparent 70%)}
+.room-card:hover{transform:translateY(-6px);box-shadow:0 22px 40px -16px rgba(0,0,0,.85),0 0 0 2px rgba(232,179,60,.55)}
+.room-icon{width:56px;height:56px;display:grid;place-items:center;font-size:29px;margin-bottom:12px;
+  background:linear-gradient(160deg,rgba(255,217,122,.22),rgba(155,123,255,.18));border:1px solid var(--line);border-radius:15px}
+.room-card h3{font-family:'Mitr',sans-serif;font-weight:500;font-size:19px;margin:0 0 4px;color:#FFF3D0}
+.room-meta{font-size:12.5px;color:#A79BD6;margin-bottom:12px}
+.room-champ{display:flex;align-items:center;gap:7px;font-size:13px;color:#D8CEFA;background:rgba(0,0,0,.26);border-radius:10px;padding:7px 10px;margin-bottom:12px}
+.room-champ b{color:var(--gold-lite);font-family:'Chakra Petch',sans-serif}
+.room-actions{display:flex;gap:7px;position:relative;z-index:2}
+.room-actions .btn{padding:7px 12px;font-size:13px;flex:none}
+.room-actions .grow{flex:1;text-align:center}
+.new-room{display:grid;place-content:center;gap:8px;text-align:center;min-height:200px;cursor:pointer;
+  border:2px dashed rgba(232,179,60,.35);border-radius:18px;background:transparent;color:#C9BDF2;font-family:inherit;transition:.18s}
+.new-room:hover{background:rgba(232,179,60,.09);border-color:var(--gold);transform:translateY(-4px)}
+.new-room span{font-size:38px;display:block}
+.new-room b{font-family:'Mitr',sans-serif;font-weight:500;font-size:16px;color:var(--gold-lite)}
+
+/* ══ แถบเครื่องมือ ══ */
+.toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 14px;margin-bottom:14px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius)}
+.toolbar.group{border-color:rgba(63,191,143,.4);background:rgba(63,191,143,.08)}
+.tool-label{font-size:12.5px;color:#A79BD6;letter-spacing:.3px}
+.mode-tag{display:flex;align-items:center;gap:6px;font-size:12.5px;font-weight:600;color:#9EEBC9;
+  background:rgba(63,191,143,.18);border:1px solid rgba(63,191,143,.4);padding:6px 11px;border-radius:20px}
+.chipset{display:flex;gap:6px;background:rgba(0,0,0,.28);padding:4px;border-radius:12px}
+.chip{border:0;cursor:pointer;padding:7px 15px;border-radius:9px;font-weight:600;background:transparent;
+  color:#B9AEE6;font-family:'Chakra Petch','Mitr',sans-serif;font-size:15px;transition:.15s}
+.chip:hover{color:#fff}
+.chip.on{background:linear-gradient(180deg,var(--gold-lite),var(--gold));color:#3A2607;box-shadow:0 4px 14px rgba(232,179,60,.4)}
+.chip.minus.on{background:linear-gradient(180deg,#FF9E7A,var(--ember));color:#3B1200;box-shadow:0 4px 14px rgba(255,107,53,.4)}
+
+/* แถบโจรกรรม */
+.heistbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 14px;margin-bottom:14px;border-radius:var(--radius);
+  background:linear-gradient(90deg,rgba(196,107,255,.2),rgba(120,50,190,.12));border:1px solid rgba(196,107,255,.45);
+  animation:heistglow 2.4s ease-in-out infinite}
+@keyframes heistglow{0%,100%{box-shadow:0 0 0 rgba(196,107,255,0)}50%{box-shadow:0 0 26px -6px rgba(196,107,255,.6)}}
+.heistbar .ht{font-family:'Mitr',sans-serif;font-size:15px;color:#EBD3FF;display:flex;align-items:center;gap:8px}
+.heistbar .hs{font-size:13px;color:#C9AEE8}
+.heistbar .hs b{color:#F3E2FF}
+
+.stage{display:grid;grid-template-columns:1fr 300px;gap:16px;align-items:start}
+@media(max-width:1000px){.stage{grid-template-columns:1fr}}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(178px,1fr));gap:14px}
+.grid.big{grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+
+.card{position:relative;cursor:pointer;user-select:none;text-align:left;padding:0;overflow:hidden;border:0;border-radius:14px;
+  background:linear-gradient(170deg,var(--parchment) 0%,var(--parchment2) 100%);
+  box-shadow:0 10px 22px -10px rgba(0,0,0,.75), inset 0 0 0 1px rgba(60,40,10,.14);
+  transition:transform .16s cubic-bezier(.3,1.5,.5,1),box-shadow .16s;font-family:inherit;color:var(--ink)}
+.card:hover{transform:translateY(-5px) rotate(-.5deg);box-shadow:0 18px 30px -12px rgba(0,0,0,.8),0 0 0 2px rgba(232,179,60,.55)}
+.card:active{transform:translateY(0) scale(.97)}
+.card.pop{animation:pop .34s ease}
+@keyframes pop{0%{transform:scale(1)}35%{transform:scale(1.07) rotate(1deg)}100%{transform:scale(1)}}
+.card.levelup{animation:levelup .8s ease}
+@keyframes levelup{0%,100%{box-shadow:0 10px 22px -10px rgba(0,0,0,.75)}
+  25%{box-shadow:0 0 0 5px var(--gold-lite),0 0 42px 8px rgba(232,179,60,.85)}
+  70%{box-shadow:0 0 0 3px rgba(232,179,60,.5),0 0 26px 4px rgba(232,179,60,.4)}}
+.card-band{display:flex;align-items:center;gap:7px;padding:7px 10px;background:linear-gradient(90deg,var(--night3),var(--night2));color:var(--gold-lite);font-size:11.5px;font-weight:600;letter-spacing:.4px}
+.card-band .rk{font-size:14px}
+.card-band .no{margin-left:auto;font-family:'Chakra Petch',sans-serif;font-size:12px;color:#BFAFF5;background:rgba(255,255,255,.1);padding:1px 7px;border-radius:20px}
+.card-band .no.top{background:linear-gradient(180deg,var(--gold-lite),var(--gold));color:#3A2607}
+.card-body{padding:12px 12px 11px;display:flex;flex-direction:column;align-items:center;gap:7px}
+.ava{width:56px;height:56px;display:grid;place-items:center;font-size:30px;line-height:1;background:radial-gradient(circle at 40% 32%,#fff,#E3D3AC);border-radius:50%;box-shadow:inset 0 0 0 2px rgba(46,33,83,.16),0 4px 10px rgba(0,0,0,.18)}
+.grid.big .ava{width:74px;height:74px;font-size:40px}
+.nm{font-family:'Mitr',sans-serif;font-weight:500;font-size:15px;line-height:1.25;text-align:center;color:var(--ink);word-break:break-word}
+.grid.big .nm{font-size:19px}
+.score{display:flex;align-items:baseline;gap:5px;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:28px;color:var(--ember);line-height:1}
+.grid.big .score{font-size:38px}
+.score .unit{font-size:12px;color:var(--ink-soft);font-family:'IBM Plex Sans Thai',sans-serif;font-weight:500}
+.gems{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;margin-top:1px}
+.gem{width:9px;height:9px;background:rgba(46,33,83,.14);clip-path:polygon(50% 0,100% 35%,82% 100%,18% 100%,0 35%);transition:.2s}
+.gem.on{background:linear-gradient(180deg,var(--gold-lite),var(--ember));box-shadow:0 0 7px rgba(255,140,60,.8)}
+.card-foot{display:flex;justify-content:space-between;padding:0 8px 8px;gap:6px;opacity:0;transition:opacity .15s}
+.card:hover .card-foot,.card:focus-within .card-foot{opacity:1}
+@media(hover:none){.card-foot{opacity:1}}
+.mini{border:0;cursor:pointer;padding:4px 10px;border-radius:8px;font-size:12px;font-weight:600;background:rgba(46,33,83,.1);color:var(--ink-soft);transition:.15s}
+.mini:hover{background:rgba(46,33,83,.22);color:var(--ink)}
+.mini.sub:hover{background:rgba(255,107,53,.22);color:#B93E0A}
+
+/* สถานะโจรกรรม */
+.heist-on .card,.heist-on .gcard{cursor:crosshair}
+.heist-on .card-foot{display:none}
+.card.thiefsel,.gcard.thiefsel{
+  box-shadow:0 0 0 4px var(--thief),0 0 40px 4px rgba(196,107,255,.7)!important;
+  transform:translateY(-6px) scale(1.03)}
+.card.safe,.gcard.safe{opacity:.42;cursor:not-allowed;filter:grayscale(.35)}
+.card.safe::after,.gcard.safe::after{content:"🛡️";position:absolute;top:8px;left:8px;font-size:18px;z-index:3;filter:none}
+.card.robbed{animation:robbed .6s ease}
+@keyframes robbed{0%,100%{transform:none}20%{transform:translateX(-9px) rotate(-2deg)}40%{transform:translateX(9px) rotate(2deg)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+.thiefmark{position:absolute;top:6px;right:6px;font-size:19px;z-index:4;animation:pop .4s ease}
+
+/* ══ การ์ดกลุ่ม ══ */
+.ggrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:14px}
+.gcard{position:relative;cursor:pointer;user-select:none;text-align:left;padding:0;overflow:hidden;font-family:inherit;color:#EFE9FF;
+  border:1px solid var(--line);border-radius:16px;background:linear-gradient(165deg,rgba(58,40,116,.95),rgba(23,15,54,.95));
+  box-shadow:var(--shadow);transition:transform .16s cubic-bezier(.3,1.5,.5,1),box-shadow .16s}
+.gcard:hover{transform:translateY(-5px);box-shadow:0 20px 34px -14px rgba(0,0,0,.85),0 0 0 2px rgba(232,179,60,.55)}
+.gcard:active{transform:scale(.98)}
+.gcard.pop{animation:pop .34s ease}
+.gcard.robbed{animation:robbed .6s ease}
+.gcard.reveal{animation:reveal .55s cubic-bezier(.2,1.5,.4,1) backwards}
+@keyframes reveal{from{opacity:0;transform:translateY(26px) scale(.86)}to{opacity:1;transform:none}}
+.gcard-head{display:flex;align-items:center;gap:10px;padding:12px 13px;background:linear-gradient(90deg,var(--gc),transparent)}
+.gcard-head .gi{width:42px;height:42px;flex:none;display:grid;place-items:center;font-size:23px;background:rgba(0,0,0,.3);border-radius:12px}
+.gcard-head .gn{font-family:'Mitr',sans-serif;font-weight:500;font-size:16px;line-height:1.2;color:#FFF3D0;flex:1;min-width:0}
+.gcard-head .gn small{display:block;font-size:11px;color:#CFC3F5;font-weight:400}
+.gcard-head .gs{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:26px;color:var(--gold-lite);line-height:1}
+.gmembers{display:flex;flex-wrap:wrap;gap:6px;padding:12px 13px 14px}
+.mchip{display:flex;align-items:center;gap:5px;font-size:12.5px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.09);
+  border-radius:20px;padding:4px 10px 4px 5px;color:#E6DEFF;max-width:100%}
+.mchip .ma{font-size:15px}
+.mchip .mn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px}
+.gcard.editing .mchip{cursor:pointer;border-color:rgba(232,179,60,.5);background:rgba(232,179,60,.14)}
+.gcard.editing .mchip:hover{background:rgba(232,179,60,.3)}
+.gcard-foot{display:flex;gap:6px;padding:0 13px 12px}
+.gmini{border:0;cursor:pointer;padding:5px 11px;border-radius:9px;font-size:12px;font-weight:600;background:rgba(255,255,255,.08);color:#CFC3F5;transition:.15s}
+.gmini:hover{background:rgba(255,255,255,.18);color:#fff}
+.gpool{border:2px dashed rgba(232,179,60,.4);background:rgba(232,179,60,.06)}
+
+/* ══ ฉากลุ้น ══ */
+.draw{position:fixed;inset:0;z-index:1200;display:none;place-items:center;padding:20px;
+  background:radial-gradient(700px 500px at 50% 40%, rgba(70,45,140,.95), rgba(8,5,22,.97));backdrop-filter:blur(8px)}
+.draw.show{display:grid}
+.draw.heistbg{background:radial-gradient(700px 500px at 50% 40%, rgba(110,45,160,.95), rgba(10,4,24,.97))}
+.draw-inner{width:min(900px,100%);text-align:center;max-height:92vh;overflow-y:auto}
+.draw-title{font-family:'Mitr',sans-serif;font-size:22px;color:var(--gold-lite);margin-bottom:20px}
+.roulette{font-family:'Mitr',sans-serif;font-size:clamp(28px,7vw,54px);color:#fff;min-height:1.4em;text-shadow:0 0 30px rgba(232,179,60,.7);letter-spacing:1px}
+.ring{width:96px;height:96px;margin:22px auto 0;border-radius:50%;display:grid;place-items:center;
+  font-family:'Chakra Petch',sans-serif;font-size:40px;font-weight:700;color:var(--gold-lite);
+  border:4px solid rgba(232,179,60,.25);box-shadow:0 0 40px rgba(232,179,60,.35) inset;animation:beat 1s infinite}
+@keyframes beat{0%,100%{transform:scale(1)}50%{transform:scale(1.09)}}
+.draw-result{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:12px;margin-top:8px;text-align:left}
+.draw-actions{display:flex;gap:10px;justify-content:center;margin-top:22px;flex-wrap:wrap}
+.winner{font-family:'Mitr',sans-serif;font-size:clamp(30px,8vw,60px);color:var(--gold-lite);text-shadow:0 0 40px rgba(232,179,60,.9);animation:reveal .6s cubic-bezier(.2,1.6,.4,1)}
+.winner .wa{font-size:1.6em;display:block;margin-bottom:6px}
+.dice{font-size:clamp(70px,18vw,130px);line-height:1;animation:shake .3s infinite}
+@keyframes shake{0%,100%{transform:rotate(-13deg) scale(1)}50%{transform:rotate(13deg) scale(1.12)}}
+.hres{font-family:'Mitr',sans-serif;font-size:clamp(26px,6vw,44px);animation:reveal .55s cubic-bezier(.2,1.6,.4,1)}
+.hres.ok{color:#B6FFD9;text-shadow:0 0 40px rgba(63,191,143,.9)}
+.hres.no{color:#FFB0B0;text-shadow:0 0 40px rgba(255,90,90,.8)}
+.hres .sub2{display:block;font-size:.45em;color:#D6C9F5;margin-top:12px}
+.vs{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;margin-bottom:18px;font-family:'Mitr',sans-serif;font-size:clamp(16px,3.6vw,22px)}
+.vs .who{display:flex;align-items:center;gap:9px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);padding:9px 16px;border-radius:14px}
+.vs .who i{font-style:normal;font-size:1.5em}
+.vs .mid{color:var(--thief);font-family:'Chakra Petch',sans-serif;font-size:1.2em}
+
+/* ตัวเลือกทายลูกเต๋า */
+.dicepick{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin:6px 0 22px}
+.dicebtn{width:clamp(58px,13vw,84px);height:clamp(58px,13vw,84px);display:grid;place-items:center;cursor:pointer;
+  font-size:clamp(34px,8vw,52px);line-height:1;color:#F1E7FF;background:rgba(255,255,255,.07);
+  border:2px solid rgba(255,255,255,.16);border-radius:16px;transition:.15s}
+.dicebtn:hover{background:rgba(196,107,255,.25);transform:translateY(-4px)}
+.dicebtn.on{background:linear-gradient(180deg,#E0B6FF,var(--thief));color:#2A0B45;border-color:#F2DFFF;
+  box-shadow:0 0 26px rgba(196,107,255,.7);transform:translateY(-4px)}
+.guesstip{font-size:14px;color:#D6C4F5;margin-bottom:8px}
+.guesstip b{color:#F3E2FF}
+.finalface{font-size:clamp(80px,20vw,150px);line-height:1;animation:reveal .5s cubic-bezier(.2,1.6,.4,1)}
+
+/* ป้ายนับถอยหลังจัดอันดับ */
+.reorder-tip{display:flex;align-items:center;gap:7px;font-size:12.5px;font-weight:600;color:#FFE1A8;
+  background:rgba(232,179,60,.16);border:1px solid rgba(232,179,60,.45);padding:6px 12px;border-radius:20px;
+  animation:pop .3s ease}
+.reorder-tip b{font-family:'Chakra Petch',sans-serif;font-size:14px;color:#FFF0CC}
+
+.crystal{position:fixed;z-index:1250;font-size:30px;pointer-events:none}
+.float{position:fixed;pointer-events:none;z-index:900;font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:34px;color:var(--gold-lite);text-shadow:0 0 14px rgba(255,180,60,.9),0 2px 6px rgba(0,0,0,.6);animation:floatup 1s ease-out forwards}
+.float.neg{color:#FF9E7A;text-shadow:0 0 14px rgba(255,107,53,.9)}
+@keyframes floatup{0%{transform:translate(-50%,0) scale(.5);opacity:0}20%{transform:translate(-50%,-14px) scale(1.2);opacity:1}100%{transform:translate(-50%,-90px) scale(1);opacity:0}}
+.spark{position:fixed;width:7px;height:7px;border-radius:50%;pointer-events:none;z-index:899}
+.banner{position:fixed;top:22px;left:50%;transform:translate(-50%,-160%);z-index:950;display:flex;align-items:center;gap:12px;
+  padding:14px 26px;border-radius:16px;background:linear-gradient(135deg,#3A2A78,#1B1240);border:2px solid var(--gold);
+  box-shadow:0 0 44px rgba(232,179,60,.55);font-family:'Mitr',sans-serif;font-size:17px;color:var(--gold-lite);
+  transition:transform .5s cubic-bezier(.2,1.6,.4,1);white-space:nowrap;max-width:92vw}
+.banner.show{transform:translate(-50%,0)}
+.banner .big{font-size:32px}
+
+.side{display:flex;flex-direction:column;gap:14px;position:sticky;top:14px}
+.panel{background:linear-gradient(180deg,rgba(46,31,94,.6),rgba(21,15,48,.55));border:1px solid var(--line);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow)}
+.panel h2{font-family:'Mitr',sans-serif;font-size:15px;margin:0 0 12px;color:var(--gold-lite);display:flex;align-items:center;gap:7px;font-weight:500}
+.rank-row{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px dashed rgba(255,255,255,.09)}
+.rank-row:last-child{border-bottom:0}
+.medal{width:26px;text-align:center;font-size:17px;flex:none}
+.rank-row .rn{flex:1;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rank-row .rp{font-family:'Chakra Petch',sans-serif;font-weight:700;color:var(--gold-lite);font-size:16px}
+.rank-row.me1 .rn{color:var(--gold-lite);font-weight:600}
+.bar{height:4px;border-radius:4px;background:rgba(255,255,255,.09);margin-top:5px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--ember),var(--gold-lite));border-radius:4px;transition:width .5s}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.stat{background:rgba(255,255,255,.05);border-radius:11px;padding:9px 10px}
+.stat b{display:block;font-family:'Chakra Petch',sans-serif;font-size:22px;color:var(--gold-lite)}
+.stat span{font-size:11.5px;color:#A79BD6}
+.logline{font-size:12.5px;color:#C7BAEE;padding:6px 0;border-bottom:1px dashed rgba(255,255,255,.08);line-height:1.5}
+.logline:last-child{border-bottom:0}
+.logline b{color:#E4C4FF}
+.empty{grid-column:1/-1;text-align:center;padding:56px 20px;border:2px dashed rgba(232,179,60,.28);border-radius:var(--radius)}
+.empty .ico{font-size:52px;display:block;margin-bottom:12px}
+.empty h3{font-family:'Mitr',sans-serif;font-weight:500;margin:0 0 6px;color:var(--gold-lite)}
+.empty p{margin:0 0 16px;color:#A79BD6;font-size:14px}
+
+.mask{position:fixed;inset:0;z-index:1000;background:rgba(8,5,22,.82);backdrop-filter:blur(6px);display:none;place-items:center;padding:16px;overflow-y:auto}
+.mask.show{display:grid}
+.modal{width:min(560px,100%);background:linear-gradient(180deg,#2B1D5C,#1A1240);border:1px solid var(--line);border-radius:20px;box-shadow:0 30px 70px rgba(0,0,0,.7);padding:22px;animation:rise .25s ease}
+@keyframes rise{from{transform:translateY(22px);opacity:0}to{transform:none;opacity:1}}
+.modal h3{font-family:'Mitr',sans-serif;font-weight:500;margin:0 0 4px;color:var(--gold-lite);font-size:19px}
+.modal .sub{color:#A79BD6;font-size:13px;margin:0 0 16px}
+.modal label{display:block;font-size:13px;color:#C5B9EE;margin:14px 0 6px}
+.modal .field{width:100%}
+textarea.field{min-height:110px;resize:vertical;line-height:1.7}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.row>*{flex:1;min-width:120px}
+.actions{display:flex;gap:10px;margin-top:20px;flex-wrap:wrap}
+.actions .btn{flex:1;min-width:110px;text-align:center}
+.pickgrid{display:flex;flex-wrap:wrap;gap:6px;max-height:132px;overflow-y:auto;padding:8px;background:rgba(0,0,0,.24);border-radius:12px}
+.pickgrid button{width:38px;height:38px;font-size:21px;border:2px solid transparent;border-radius:10px;cursor:pointer;background:rgba(255,255,255,.06);transition:.12s}
+.pickgrid button:hover{background:rgba(255,255,255,.16);transform:scale(1.12)}
+.pickgrid button.on{border-color:var(--gold);background:rgba(232,179,60,.28)}
+.optset{display:flex;gap:8px;flex-wrap:wrap}
+.opt{cursor:pointer;border:1px solid var(--line);border-radius:11px;padding:9px 14px;background:rgba(255,255,255,.05);color:#D8CEFA;font-weight:600;font-size:13.5px;transition:.15s}
+.opt:hover{background:rgba(232,179,60,.15)}
+.opt.on{background:linear-gradient(180deg,var(--gold-lite),var(--gold));color:#3A2607;border-color:transparent}
+.hint{font-size:12px;color:#8F84BE;margin-top:8px;line-height:1.6}
+.movelist{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto}
+.moveitem{display:flex;align-items:center;gap:10px;cursor:pointer;width:100%;text-align:left;
+  background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:12px;padding:10px 12px;color:#EFE9FF;transition:.15s}
+.moveitem:hover{background:rgba(232,179,60,.16)}
+.moveitem .mi{font-size:20px}
+.moveitem .mc{margin-left:auto;font-size:12px;color:#A79BD6}
+/* ══ โหมดนักเรียน ══ */
+.teacher-link{text-align:center;margin-top:26px;padding-bottom:6px}
+.teacher-link a{color:#6B5B94;font-size:12px;cursor:pointer;text-decoration:underline;opacity:.7}
+.teacher-link a:hover{opacity:1;color:#A79BD6}
+.stu-topline{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:11px 14px;margin-bottom:14px;
+  background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:var(--radius)}
+.stu-me-tag{font-size:13px;color:#EFE9FF}
+.stu-me-tag b{color:var(--gold-lite);font-family:'Chakra Petch',sans-serif}
+.card.me{box-shadow:0 0 0 3px var(--gold-lite),0 0 34px 6px rgba(232,179,60,.65)!important;transform:translateY(-4px)}
+.card.me::before{content:"⭐ คุณ";position:absolute;top:6px;left:6px;font-size:10.5px;font-weight:700;
+  background:linear-gradient(180deg,var(--gold-lite),var(--gold));color:#3A2607;padding:2px 7px;border-radius:20px;z-index:3}
+.card.readonly{cursor:default}
+.card.readonly:hover{transform:none;box-shadow:0 10px 22px -10px rgba(0,0,0,.75), inset 0 0 0 1px rgba(60,40,10,.14)}
+.card.readonly.me:hover{transform:translateY(-4px);box-shadow:0 0 0 3px var(--gold-lite),0 0 34px 6px rgba(232,179,60,.65)}
+.card.readonly .card-foot{display:none}
+.who-card{cursor:pointer;text-align:center;padding:14px 10px;border-radius:14px;border:1px solid var(--line);
+  background:linear-gradient(170deg,var(--parchment),var(--parchment2));color:var(--ink);font-family:inherit;
+  display:flex;flex-direction:column;align-items:center;gap:6px;transition:.15s}
+.who-card:hover{transform:translateY(-4px);box-shadow:0 14px 26px -12px rgba(0,0,0,.6)}
+.who-card .ava{width:48px;height:48px;font-size:26px}
+.who-card .nm{font-size:13.5px}
+
+/* ══ ปุ่ม Admin บนแท็บ ══ */
+.admin-tab{padding:8px 14px;font-size:13px;border-color:rgba(232,179,60,.4);color:#F0DFAE;white-space:nowrap}
+.admin-tab:hover{background:rgba(232,179,60,.2)}
+
+/* ══ โพเดียม 3 อันดับแรก ══ */
+.podium-stage{display:flex;align-items:flex-end;justify-content:center;gap:10px;margin:8px 0 30px;
+  padding:16px 8px 0;flex-wrap:nowrap}
+.pod{display:flex;flex-direction:column;align-items:center;flex:1 1 0;max-width:210px;min-width:0;
+  animation:podrise .7s cubic-bezier(.2,1.4,.4,1) backwards}
+@keyframes podrise{from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:none}}
+.pod .hero{width:78px;height:78px;display:grid;place-items:center;font-size:44px;line-height:1;margin-bottom:-14px;
+  background:radial-gradient(circle at 40% 32%,#fff,#E3D3AC);border-radius:50%;
+  box-shadow:inset 0 0 0 3px rgba(46,33,83,.18),0 8px 18px rgba(0,0,0,.45);position:relative;z-index:3}
+.pod.p1 .hero{width:96px;height:96px;font-size:54px;
+  box-shadow:inset 0 0 0 3px var(--gold),0 0 34px 6px rgba(232,179,60,.65),0 8px 18px rgba(0,0,0,.45)}
+.pod .crown{font-size:30px;margin-bottom:2px;animation:bob 2.2s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.pod .pname{font-family:'Mitr',sans-serif;font-weight:500;font-size:14.5px;color:#FFF3D0;text-align:center;
+  line-height:1.25;margin:16px 0 3px;word-break:break-word;max-width:100%}
+.pod.p1 .pname{font-size:17px;color:var(--gold-lite)}
+.pod .pscore{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:22px;line-height:1}
+.pod.p1 .pscore{font-size:29px;color:var(--gold-lite)}
+.pod.p2 .pscore{color:#DCE4F0}
+.pod.p3 .pscore{color:#F0B98C}
+.pod .prank{font-size:11.5px;color:#C3B6EE;margin-top:3px}
+.pod .pillar{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+  padding:12px 8px;margin-top:10px;border-radius:14px 14px 0 0;position:relative;overflow:hidden}
+.pod.p1 .pillar{height:150px;background:linear-gradient(180deg,rgba(232,179,60,.42),rgba(90,60,15,.25));
+  border:1px solid rgba(232,179,60,.6);border-bottom:0}
+.pod.p2 .pillar{height:112px;background:linear-gradient(180deg,rgba(190,200,220,.32),rgba(60,66,90,.22));
+  border:1px solid rgba(190,200,220,.45);border-bottom:0}
+.pod.p3 .pillar{height:92px;background:linear-gradient(180deg,rgba(214,133,74,.34),rgba(80,45,20,.22));
+  border:1px solid rgba(214,133,74,.5);border-bottom:0}
+.pod .medal-badge{width:44px;height:44px;display:grid;place-items:center;font-family:'Chakra Petch',sans-serif;
+  font-weight:700;font-size:22px;color:#3A2607;margin-bottom:6px;
+  clip-path:polygon(50% 0,100% 36%,82% 100%,18% 100%,0 36%)}
+.pod.p1 .medal-badge{background:linear-gradient(180deg,var(--gold-lite),var(--gold));width:52px;height:52px;font-size:26px;
+  box-shadow:0 0 20px rgba(232,179,60,.7)}
+.pod.p2 .medal-badge{background:linear-gradient(180deg,#EEF3FA,#A9B4C8)}
+.pod.p3 .medal-badge{background:linear-gradient(180deg,#F5C08E,#C4763C)}
+.pod .prankname{font-size:11.5px;color:#EFE9FF;opacity:.9;text-align:center;line-height:1.3}
+.pod.me .pillar{box-shadow:inset 0 0 0 2px var(--gold-lite)}
+.podium-base{height:9px;max-width:660px;margin:0 auto 26px;border-radius:0 0 8px 8px;
+  background:linear-gradient(90deg,rgba(232,179,60,.25),rgba(232,179,60,.55),rgba(232,179,60,.25))}
+.rank-heading{font-family:'Mitr',sans-serif;font-weight:500;font-size:16px;color:var(--gold-lite);
+  margin:0 0 14px;display:flex;align-items:center;gap:8px}
+@media(max-width:600px){
+  .podium-stage{gap:5px;margin-bottom:24px}
+  .pod .hero{width:54px;height:54px;font-size:29px;margin-bottom:-10px}
+  .pod.p1 .hero{width:66px;height:66px;font-size:36px}
+  .pod .crown{font-size:21px}
+  .pod .pname{font-size:11.5px;margin-top:13px}
+  .pod.p1 .pname{font-size:13px}
+  .pod .pscore{font-size:16px}
+  .pod.p1 .pscore{font-size:21px}
+  .pod .medal-badge{width:33px;height:33px;font-size:16px}
+  .pod.p1 .medal-badge{width:39px;height:39px;font-size:19px}
+  .pod.p1 .pillar{height:108px}
+  .pod.p2 .pillar{height:82px}
+  .pod.p3 .pillar{height:68px}
+  .pod .prankname{font-size:10px}
+  .admin-tab{padding:7px 10px;font-size:12px}
+}
+
+.toast{position:fixed;bottom:22px;left:50%;transform:translate(-50%,140%);z-index:1300;background:#2B1D5C;border:1px solid var(--line);border-radius:12px;padding:11px 20px;font-size:14px;color:#EFE9FF;box-shadow:var(--shadow);transition:transform .35s}
+.toast.show{transform:translate(-50%,0)}
+
+/* ══ สถานะซิงก์ ══ */
+.syncbtn{position:relative;font-size:15px}
+.syncbtn .dot{position:absolute;top:5px;right:5px;width:9px;height:9px;border-radius:50%;border:2px solid var(--night)}
+.syncbtn .dot.ok{background:var(--emerald)}
+.syncbtn .dot.pending{background:var(--gold-lite);animation:pulse2 1s infinite}
+.syncbtn .dot.off{background:#6B5B94}
+.syncbtn .dot.err{background:var(--ember)}
+@keyframes pulse2{0%,100%{opacity:1}50%{opacity:.3}}
+.synctip{position:fixed;bottom:22px;left:50%;transform:translate(-50%,140%);z-index:1300;background:#2B1D5C;border:1px solid var(--line);
+  border-radius:12px;padding:11px 20px;font-size:13px;color:#C9BDF2;box-shadow:var(--shadow);transition:transform .35s}
+.synctip.show{transform:translate(-50%,0)}
+
+/* ══ ประตูล็อกอิน ══ */
+.gate{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:20px;
+  background:radial-gradient(1000px 600px at 20% -10%,#3B2673,transparent 60%),radial-gradient(800px 500px at 90% 0%,#1E3A6B,transparent 55%),var(--night)}
+.gate-box{width:min(380px,100%);background:linear-gradient(180deg,rgba(46,31,94,.9),rgba(21,15,48,.85));
+  border:1px solid var(--line);border-radius:20px;padding:28px 24px;box-shadow:var(--shadow);text-align:center}
+.gate-box .crest{margin:0 auto 14px;width:60px;height:60px;font-size:30px}
+.gate-box h2{font-family:'Mitr',sans-serif;font-weight:500;font-size:20px;margin:0 0 4px;color:var(--gold-lite)}
+.gate-box p{color:#A79BD6;font-size:13px;margin:0 0 20px}
+.gate-box .field{width:100%;margin-bottom:10px;text-align:left}
+.gate-box .btn{width:100%;justify-content:center}
+.gate-err{color:#FFB699;font-size:12.5px;margin-top:10px;min-height:16px}
+.gate-skip{margin-top:16px;font-size:12.5px}
+.gate-skip a{color:#9EEBC9;cursor:pointer;text-decoration:underline}
+.admin-user-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(232,179,60,.14);
+  border:1px solid rgba(232,179,60,.35);color:#E8D9B0;font-size:13.5px;padding:8px 14px;border-radius:11px;margin-bottom:12px}
+.admin-user-badge b{color:var(--gold-lite)}
+
+@media(max-width:600px){
+  .brand h1{font-size:17px}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(146px,1fr));gap:10px}
+  .score{font-size:24px}
+  .tool-label{display:none}
+  .lobby-grid{grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px}
+  .ggrid{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- โมดัลแอดมิน: ครูกรอกรหัสผ่านเพื่อเข้าหลังบ้าน -->
+  <div class="mask" id="mAdmin">
+    <div class="modal" style="text-align:center">
+      <div class="crest" style="margin:0 auto 12px">⚜</div>
+      <h3>เข้าสู่ระบบ Admin</h3>
+      <p class="sub">สำหรับครูเท่านั้น</p>
+      <div class="admin-user-badge">👤 ชื่อผู้ใช้: <b>Admin</b></div>
+      <input id="gatePass" class="field" type="password" placeholder="รหัสผ่าน Admin" autocomplete="current-password" style="width:100%">
+      <div class="gate-err" id="gateErr"></div>
+      <div class="actions">
+        <button class="btn ghost" data-close>ยกเลิก</button>
+        <button class="btn gold" id="btnGateLogin">🔓 เข้าสู่ระบบ</button>
+      </div>
+    </div>
+  </div>
+
+  <header class="topbar">
+    <button class="iconbtn hide" id="btnBack" title="กลับไปหอกิลด์">←</button>
+    <div class="brand">
+      <div class="crest" id="brandIcon">⚜</div>
+      <div style="min-width:0">
+        <h1 id="brandName">กิลด์ผู้กล้า</h1>
+        <small id="brandSub">เลือกห้องเรียนเพื่อดูอันดับของคุณ</small>
+      </div>
+    </div>
+    <select id="classSel" class="field hide" title="สลับห้องเรียน"></select>
+    <button class="iconbtn hide" id="btnBig" title="ขยายการ์ดสำหรับฉายจอ">🔍</button>
+    <button class="iconbtn hide" id="btnFull" title="เต็มจอ">⛶</button>
+    <button class="iconbtn syncbtn hide" id="btnSync" title="สถานะซิงก์ขึ้นคลาวด์">☁️<span class="dot off" id="syncDot"></span></button>
+    <button class="btn admin-tab" id="btnAdminOpen" title="เข้าสู่ระบบ Admin">🔑 Admin</button>
+    <button class="iconbtn" id="btnSound" title="เปิด/ปิดเสียง">🔊</button>
+    <button class="iconbtn hide" id="btnSettings" title="ตั้งค่าและข้อมูล">⚙️</button>
+  </header>
+
+  <!-- ══ โหมดนักเรียน: หอกิลด์อ่านอย่างเดียว ══ -->
+  <section id="viewStuLobby">
+    <div class="lobby-head">
+      <h2>🏰 หอกิลด์ — เลือกห้องเรียนของคุณ</h2>
+      <p>แตะห้องเรียนเพื่อดูอันดับและยศของคุณ</p>
+    </div>
+    <div class="lobby-grid" id="stuLobbyGrid"></div>
+  </section>
+
+  <!-- ══ โหมดนักเรียน: โพเดียม + อันดับทั้งห้อง ══ -->
+  <section id="viewStuBoard" class="hide">
+    <div class="stu-topline">
+      <button class="btn ghost" id="btnStuBack2">← เลือกห้องอื่น</button>
+      <span class="stu-me-tag" id="stuMeTag"></span>
+    </div>
+    <div class="podium-stage" id="podiumStage"></div>
+    <div class="podium-base hide" id="podiumBase"></div>
+    <h3 class="rank-heading" id="rankHeading">📜 อันดับทั้งหมดในห้อง</h3>
+    <div class="grid" id="stuGrid"></div>
+  </section>
+
+  <!-- ══ โหมดครู (หลังบ้าน) ══ -->
+  <section id="viewLobby" class="hide">
+    <div class="lobby-head">
+      <h2>🏰 หอกิลด์ — ห้องเรียนทั้งหมด</h2>
+      <p>เลือกห้องที่จะสอน หรือสร้างห้องใหม่พร้อมใส่รายชื่อนักเรียนได้เลย</p>
+    </div>
+    <div class="lobby-grid" id="lobbyGrid"></div>
+  </section>
+
+  <section id="viewRoom" class="hide">
+
+    <div class="toolbar" id="toolSolo">
+      <span class="tool-label">คลิกการ์ดเพื่อให้</span>
+      <div class="chipset" data-stepset>
+        <button class="chip on" data-step="1">+1</button>
+        <button class="chip" data-step="3">+3</button>
+        <button class="chip" data-step="5">+5</button>
+        <button class="chip minus" data-step="-1">−1</button>
+      </div>
+      <input id="search" class="field" placeholder="🔍 ค้นหาชื่อ" style="width:140px">
+      <select id="sortSel" class="field" title="เรียงลำดับ">
+        <option value="score">เรียงตามแต้ม</option>
+        <option value="name">เรียงตามชื่อ</option>
+        <option value="added">เรียงตามลำดับที่เพิ่ม</option>
+      </select>
+      <span class="reorder-tip hide" id="reorderTip">⏳ จัดอันดับใหม่ใน <b id="reorderSec">3</b> วิ</span>
+      <div class="spacer"></div>
+      <button class="btn thief" id="btnHeist">🥷 โจรกรรม</button>
+      <button class="btn" id="btnPickOne">🎯 สุ่มชื่อ</button>
+      <button class="btn" id="btnGroup">🎲 จับคู่/กลุ่ม</button>
+      <button class="btn ghost" id="btnUndo" title="ย้อนกลับ">↺</button>
+      <button class="btn gold" id="btnAdd">+ เพิ่มนักเรียน</button>
+    </div>
+
+    <div class="toolbar group hide" id="toolGroup">
+      <span class="mode-tag">👥 โหมดกิจกรรมกลุ่ม</span>
+      <span class="tool-label">คลิกการ์ดกลุ่ม ทุกคนได้เท่ากัน</span>
+      <div class="chipset" data-stepset>
+        <button class="chip on" data-step="1">+1</button>
+        <button class="chip" data-step="3">+3</button>
+        <button class="chip" data-step="5">+5</button>
+        <button class="chip minus" data-step="-1">−1</button>
+      </div>
+      <div class="spacer"></div>
+      <button class="btn thief" id="btnHeistG">🥷 โจรกรรม</button>
+      <button class="btn" id="btnGroupEdit">✏️ ปรับกลุ่ม</button>
+      <button class="btn" id="btnGroupAdd">➕ เพิ่มกลุ่ม</button>
+      <button class="btn" id="btnReroll">🔀 สุ่มใหม่</button>
+      <button class="btn ghost" id="btnUndo2" title="ย้อนกลับ">↺</button>
+      <button class="btn gold" id="btnEndGroup">✅ จบกิจกรรม</button>
+    </div>
+
+    <!-- แถบสถานะโจรกรรม -->
+    <div class="heistbar hide" id="heistBar">
+      <span class="ht">🥷 <b>โหมดโจรกรรมคริสตัล</b></span>
+      <span class="hs" id="heistStep">ขั้นที่ 1 — เลือก <b>ผู้ลงมือ</b></span>
+      <div class="spacer"></div>
+      <span class="hs">ขโมยครั้งละ <b id="heistAmtTxt">3</b> คริสตัล</span>
+      <button class="btn" id="btnHeistCfg">⚙️ ตั้งค่า</button>
+      <button class="btn danger" id="btnHeistOff">✖ ออกจากโหมด</button>
+    </div>
+
+    <div class="stage">
+      <main id="mainArea">
+        <div class="grid" id="grid"></div>
+        <div class="ggrid hide" id="ggrid"></div>
+      </main>
+      <aside class="side">
+        <div class="panel"><h2 id="boardTitle">🏆 แท่นเกียรติยศ</h2><div id="board"></div></div>
+        <div class="panel hide" id="logPanel"><h2>📜 บันทึกโจรกรรม</h2><div id="logBox"></div></div>
+        <div class="panel"><h2>📊 สรุปห้อง</h2><div class="stats" id="stats"></div></div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<div class="banner" id="banner"></div>
+<div class="toast" id="toast"></div>
+
+<div class="draw" id="drawOverlay">
+  <div class="draw-inner">
+    <div class="draw-title" id="drawTitle">🎲 กำลังเสี่ยงทาย...</div>
+    <div id="vsBox" class="vs hide"></div>
+    <div id="heistPick" class="hide">
+      <div class="guesstip" id="guessTip">เลือก <b>1</b> เลขที่คิดว่าลูกเต๋าจะออก</div>
+      <div class="dicepick" id="dicePick"></div>
+      <button class="btn gold" id="btnRollDice" style="font-size:17px;padding:13px 30px">🎲 ทอยลูกเต๋า</button>
+    </div>
+    <div class="roulette" id="roulette">—</div>
+    <div class="ring" id="drawRing">5</div>
+    <div class="draw-result" id="drawResult"></div>
+    <div class="draw-actions hide" id="drawActions">
+      <button class="btn" id="btnDrawAgain">🔀 สุ่มใหม่อีกครั้ง</button>
+      <button class="btn gold" id="btnDrawOk">เริ่มกิจกรรม</button>
+    </div>
+  </div>
+</div>
+
+<!-- โมดัล: ตั้งค่าโจรกรรม -->
+<div class="mask" id="mHeist">
+  <div class="modal">
+    <h3>🥷 ตั้งค่าโหมดโจรกรรมคริสตัล</h3>
+    <p class="sub">ครูเป็นคนกดเปิดเท่านั้น — เลือกผู้ลงมือ แล้วเลือกเป้าหมาย</p>
+    <label>ขโมยครั้งละกี่คริสตัล</label>
+    <div class="optset" id="hAmt">
+      <button class="opt" data-v="1">1</button>
+      <button class="opt on" data-v="3">3</button>
+      <button class="opt" data-v="5">5</button>
+    </div>
+    <label>🎲 ให้นักเรียนทายเลขลูกเต๋ากี่เลข</label>
+    <div class="optset" id="hRoll">
+      <button class="opt" data-r="1">ทาย 1 เลข (ยาก 17%)</button>
+      <button class="opt on" data-r="2">ทาย 2 เลข (33%)</button>
+      <button class="opt" data-r="3">ทาย 3 เลข (ง่าย 50%)</button>
+      <button class="opt" data-r="0">ไม่ต้องทอย สำเร็จเลย</button>
+    </div>
+    <label>🛡️ เกราะป้องกันผู้อ่อนแอ</label>
+    <div class="optset" id="hGuard">
+      <button class="opt" data-g="0">ไม่ป้องกัน</button>
+      <button class="opt on" data-g="1">กันอันดับ 3 ท้ายสุด</button>
+      <button class="opt" data-g="2">กันคนแต้มน้อยกว่าค่าเฉลี่ย</button>
+    </div>
+    <p class="hint">คนที่ถูกเกราะคุ้มครองจะเป็นสีจาง มีสัญลักษณ์ 🛡️ และคลิกเลือกเป็นเป้าหมายไม่ได้ · แต้มไม่มีทางติดลบ ถ้าเป้าหมายมีน้อยกว่าที่ตั้งไว้ จะขโมยได้เท่าที่เขามี</p>
+    <div class="actions">
+      <button class="btn ghost" data-close>ปิด</button>
+      <button class="btn gold" id="btnHeistStart">เริ่มโหมดโจรกรรม</button>
+    </div>
+  </div>
+</div>
+
+<!-- โมดัล: สุ่มกลุ่ม -->
+<div class="mask" id="mGroup">
+  <div class="modal">
+    <h3>🎲 สุ่มจับคู่ / แบ่งกลุ่ม</h3>
+    <p class="sub">เลือกรูปแบบแล้วกดเริ่ม จะมีฉากลุ้นก่อนเฉลยผล</p>
+    <div id="resumeBox" class="hide" style="background:rgba(63,191,143,.12);border:1px solid rgba(63,191,143,.4);border-radius:12px;padding:12px;margin-bottom:6px">
+      <div style="font-size:13.5px;color:#9EEBC9;margin-bottom:9px">มีกลุ่มที่จัดไว้แล้วในห้องนี้</div>
+      <button class="btn" id="btnResume" style="width:100%">↩️ ใช้กลุ่มเดิมต่อ</button>
+    </div>
+    <label>รูปแบบ</label>
+    <div class="optset" id="gType">
+      <button class="opt on" data-t="pair">👫 จับคู่ 2 คน</button>
+      <button class="opt" data-t="size">👥 กลุ่มละกี่คน</button>
+      <button class="opt" data-t="count">🔢 แบ่งเป็นกี่กลุ่ม</button>
+    </div>
+    <div id="gValWrap" class="hide">
+      <label for="gVal" id="gValLabel">จำนวน</label>
+      <input id="gVal" class="field" type="number" min="2" max="20" value="4">
+    </div>
+    <label>วิธีคละ</label>
+    <div class="optset" id="gMix">
+      <button class="opt on" data-m="random">🎰 สุ่มล้วน</button>
+      <button class="opt" data-m="balance">⚖️ คละเก่ง-อ่อน ให้สูสี</button>
+    </div>
+    <label>เวลาลุ้น</label>
+    <div class="optset" id="gTime">
+      <button class="opt" data-s="3">3 วินาที</button>
+      <button class="opt on" data-s="5">5 วินาที</button>
+      <button class="opt" data-s="8">8 วินาที</button>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" data-close>ยกเลิก</button>
+      <button class="btn gold" id="btnGroupStart">เริ่มสุ่ม</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mMove">
+  <div class="modal">
+    <h3 id="moveTitle">ย้ายไปกลุ่มไหน</h3>
+    <p class="sub">เลือกกลุ่มปลายทาง</p>
+    <div class="movelist" id="moveList"></div>
+    <div class="actions"><button class="btn ghost" data-close>ปิด</button></div>
+  </div>
+</div>
+
+<div class="mask" id="mRoom">
+  <div class="modal">
+    <h3 id="roomTitle">สร้างห้องเรียนใหม่</h3>
+    <p class="sub" id="roomSub">ตั้งชื่อห้อง เลือกตราประจำห้อง แล้วใส่รายชื่อนักเรียนได้เลย</p>
+    <label for="roomName">ชื่อห้องเรียน</label>
+    <input id="roomName" class="field" placeholder="เช่น ป.5/1 หรือ ม.2/1">
+    <label>ตราประจำห้อง</label>
+    <div class="pickgrid" id="roomIconPick"></div>
+    <div id="roomStudentsWrap">
+      <label for="roomStudents">รายชื่อนักเรียน (ไม่ใส่ตอนนี้ก็ได้)</label>
+      <textarea id="roomStudents" class="field" placeholder="ด.ช. สมชาย ใจดี&#10;ด.ญ. สมหญิง ตั้งใจ"></textarea>
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label for="roomNumCount" style="margin-top:0">หรือสร้างเป็นเลขที่ 1 ถึง</label>
+          <input id="roomNumCount" class="field" type="number" min="1" max="60" value="30">
+        </div>
+        <button class="btn" id="btnRoomNums" style="flex:none;padding:10px 16px">สร้างเลขที่</button>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" data-close>ยกเลิก</button>
+      <button class="btn gold" id="btnRoomSave">บันทึกห้องเรียน</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mAdd">
+  <div class="modal">
+    <h3>เพิ่มนักเรียนเข้าห้อง</h3>
+    <p class="sub">พิมพ์ชื่อบรรทัดละ 1 คน วางรายชื่อทั้งห้องพร้อมกันได้เลย</p>
+    <label for="addNames">รายชื่อนักเรียน</label>
+    <textarea id="addNames" class="field" placeholder="ด.ช. สมชาย ใจดี&#10;ด.ญ. สมหญิง ตั้งใจ"></textarea>
+    <div class="row" style="margin-top:14px">
+      <div>
+        <label for="numCount" style="margin-top:0">หรือสร้างเป็นเลขที่ 1 ถึง</label>
+        <input id="numCount" class="field" type="number" min="1" max="60" value="30">
+      </div>
+      <button class="btn" id="btnMakeNums" style="flex:none;padding:10px 16px">สร้างเลขที่</button>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" data-close>ยกเลิก</button>
+      <button class="btn gold" id="btnAddSave">เพิ่มเข้าห้อง</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mEdit">
+  <div class="modal">
+    <h3>แก้ไขข้อมูลนักเรียน</h3>
+    <p class="sub">เปลี่ยนชื่อ เลือกอวตาร หรือปรับแต้มด้วยมือ</p>
+    <label for="edName">ชื่อ</label>
+    <input id="edName" class="field">
+    <label for="edPoints">แต้มสะสม</label>
+    <input id="edPoints" class="field" type="number" min="0">
+    <label>อวตาร</label>
+    <div class="pickgrid" id="avaPick"></div>
+    <div class="actions">
+      <button class="btn danger" id="btnDel" style="flex:0 0 auto">🗑 ลบนักเรียน</button>
+      <button class="btn ghost" data-close>ยกเลิก</button>
+      <button class="btn gold" id="btnEditSave">บันทึก</button>
+    </div>
+  </div>
+</div>
+
+<div class="mask" id="mSet">
+  <div class="modal">
+    <h3>ตั้งค่าและข้อมูล</h3>
+    <p class="sub">ข้อมูลบันทึกในเครื่องอัตโนมัติ แนะนำให้สำรองไฟล์ทุกสิ้นเดือน</p>
+    <label for="perLevel">คริสตัลที่ต้องใช้ต่อ 1 ระดับ</label>
+    <select id="perLevel" class="field">
+      <option value="5">5 แต้ม (เลื่อนขั้นไว)</option>
+      <option value="10">10 แต้ม (แนะนำ)</option>
+      <option value="20">20 แต้ม (เลื่อนขั้นช้า)</option>
+    </select>
+    <label>บัญชีซิงก์คลาวด์</label>
+    <button class="btn" id="btnLogout" style="width:100%">🔓 ออกจากระบบซิงก์ (กลับไปใช้ออฟไลน์)</button>
+    <label>สำรองและกู้คืนข้อมูล</label>
+    <div class="row">
+      <button class="btn" id="btnExport">💾 สำรองไฟล์</button>
+      <button class="btn" id="btnCsv">📄 ออกเป็น CSV</button>
+      <button class="btn" id="btnImport">📥 กู้คืนไฟล์</button>
+    </div>
+    <input type="file" id="fileIn" accept="application/json" hidden>
+    <label>เริ่มเทอมใหม่</label>
+    <button class="btn danger" id="btnReset" style="width:100%">♻️ ล้างแต้มทั้งห้องที่เปิดอยู่ (เก็บรายชื่อไว้)</button>
+    <p class="hint">คีย์ลัด: <b>Ctrl + Z</b> ย้อนกลับแต้มล่าสุด · <b>Esc</b> ปิดหน้าต่าง/ออกจากโหมดโจรกรรม</p>
+    <div class="actions"><button class="btn ghost" data-close>ปิด</button></div>
+  </div>
+</div>
+
+<script>
+/* ══════════ ค่าคงที่ ══════════ */
+const AVATARS = ["🦊","🐯","🐼","🦁","🐸","🐨","🐵","🦄","🐲","🦉","🐺","🦅","🐧","🐢","🦖","🐙","🦈","🐝","🦋","🐬","🦌","🐴","🦔","🐰","🌟","⚡","🔥","❄️","🍀","🎯","🗡️","🛡️","🏹","🔮","👑","🪄"];
+const ROOM_ICONS = ["🏰","🛡️","⚔️","🐉","🦅","🌙","☀️","⭐","🔥","❄️","🌊","🍀","🎓","📚","🧭","🗝️","🏹","🔮"];
+const RANKS = [
+  {min:15,name:"ตำนาน",icon:"👑"},{min:10,name:"จอมเวท",icon:"🔮"},{min:7,name:"ผู้พิทักษ์",icon:"🏹"},
+  {min:5,name:"อัศวิน",icon:"🛡️"},{min:3,name:"นักดาบ",icon:"🗡️"},{min:1,name:"ผู้ฝึกหัด",icon:"🌱"}
+];
+const PARTY = [
+  {n:"มังกรไฟ",i:"🐉",c:"rgba(255,107,53,.45)"},{n:"นกอินทรี",i:"🦅",c:"rgba(79,182,255,.45)"},
+  {n:"หมาป่าเงิน",i:"🐺",c:"rgba(180,190,220,.42)"},{n:"ฟีนิกซ์",i:"🔥",c:"rgba(255,159,64,.45)"},
+  {n:"ยูนิคอร์น",i:"🦄",c:"rgba(255,127,168,.45)"},{n:"พญานาค",i:"🐍",c:"rgba(63,191,143,.45)"},
+  {n:"ราชสีห์",i:"🦁",c:"rgba(232,179,60,.45)"},{n:"หมีขาว",i:"🐻‍❄️",c:"rgba(140,200,255,.42)"},
+  {n:"เต่าศิลา",i:"🐢",c:"rgba(120,200,140,.42)"},{n:"เหยี่ยวเวหา",i:"🪽",c:"rgba(155,123,255,.45)"},
+  {n:"วาฬน้ำเงิน",i:"🐋",c:"rgba(90,150,255,.45)"},{n:"แมงมุมเงา",i:"🕷️",c:"rgba(160,120,200,.42)"}
+];
+const KEY = "guild-board-v2";
+
+/* ══════════ Supabase config ══════════
+   ใส่ค่าจาก Supabase Dashboard → Project Settings → API
+   Project URL และ anon public key (ปลอดภัยที่จะฝังในไฟล์ เพราะมี RLS คุ้มครองอยู่) */
+const SUPABASE_URL = "https://iglgqiensbomweiweyig.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_4GuZS5at0hzoXrBtLoPRpg_raUIqsA1";
+/* อีเมลผูกบัญชี Admin ที่สร้างไว้ใน Supabase Authentication → Users
+   ใส่ตรงนี้ครั้งเดียว — ผู้ใช้จะไม่เห็นอีเมลนี้เลย เห็นแค่ "เข้าสู่ระบบ Admin" */
+const ADMIN_EMAIL = "admin@guildboard.app";
+let sb = null;
+let appRole = "student"; // "student" = โหมดดูอย่างเดียว, "teacher" = โหมดหลังบ้าน
+let studentClassId = null, rtChannel = null;
+try{
+  if(window.supabase && !SUPABASE_URL.includes("YOUR-PROJECT")){
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  }
+}catch(e){}
+let syncUser = null, syncStatus = "off", syncTimer = null, syncing = false, remoteUpdatedAt = null;
+
+let DB = {classes:[], activeId:null, settings:{sound:true, perLevel:10}};
+let view = "lobby", mode = "solo", groupEdit = false;
+let step = 1, sortBy = "score", query = "";
+let editId = null, editAva = "", movingId = null;
+let roomMode = "new", roomEditId = null, roomIcon = "🏰";
+let gType = "pair", gMix = "random", gSecs = 5, drawKind = "group";
+let pendingGroups = null, undoStack = [];
+let rollTimer = null, countTimer = null;
+let heist = {on:false, amount:3, guessCount:2, guard:1, thief:null};
+let heistLog = [];
+let heistGuess = new Set(), heistPair = null;
+let orderFreeze = null, freezeTimer = null, freezeTick = null;
+const DICE = ["","⚀","⚁","⚂","⚃","⚄","⚅"];
+
+const $ = s => document.querySelector(s);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+const activeClass = () => DB.classes.find(c => c.id === DB.activeId);
+const esc = s => String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+const shuffle = a => { const r=[...a]; for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [r[i],r[j]]=[r[j],r[i]];} return r; };
+
+const Store = {
+  async load(){
+    try{ const r = await window.storage.get(KEY); if(r && r.value) return JSON.parse(r.value); }catch(e){}
+    try{ const s = localStorage.getItem(KEY); if(s) return JSON.parse(s); }catch(e){}
+    return null;
+  },
+  async save(d){
+    const s = JSON.stringify(d);
+    try{ await window.storage.set(KEY, s); }catch(e){}
+    try{ localStorage.setItem(KEY, s); localStorage.setItem(KEY+"-t", Date.now().toString()); }catch(e){}
+  }
+};
+let saveTimer;
+function save(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => { Store.save(DB); queueCloudSync(); }, 250);
+}
+
+/* ══════════ ซิงก์ขึ้น Supabase (เบื้องหลัง, ไม่บล็อกการใช้งาน) ══════════ */
+function setSyncStatus(s){
+  syncStatus = s;
+  const dot = $("#syncDot");
+  dot.className = "dot " + s;
+  const label = {off:"ยังไม่ได้เข้าสู่ระบบ · ใช้แบบออฟไลน์ในเครื่อง", ok:"ซิงก์ล่าสุดสำเร็จ",
+    pending:"กำลังซิงก์...", err:"ซิงก์ไม่สำเร็จ ลองใหม่รอบถัดไป"}[s] || "";
+  $("#btnSync").title = "สถานะซิงก์: " + label;
+}
+function queueCloudSync(){
+  if(!sb || !syncUser) return;
+  clearTimeout(syncTimer);
+  setSyncStatus("pending");
+  syncTimer = setTimeout(pushCloud, 1500);
+}
+async function pushCloud(){
+  if(!sb || !syncUser || syncing) return;
+  syncing = true;
+  try{
+    const { error } = await sb.from("guild_state").upsert({
+      user_id: syncUser.id, data: DB, updated_at: new Date().toISOString()
+    }, { onConflict: "user_id" });
+    if(error) throw error;
+    setSyncStatus("ok");
+  }catch(e){
+    setSyncStatus("err");
+  }finally{ syncing = false; }
+}
+async function pullCloud(){
+  if(!sb || !syncUser) return null;
+  try{
+    const { data, error } = await sb.from("guild_state").select("data,updated_at").eq("user_id", syncUser.id).maybeSingle();
+    if(error) throw error;
+    return data;
+  }catch(e){ return null; }
+}
+/* ดึงข้อมูลแบบสาธารณะ (อ่านอย่างเดียว ไม่ต้องล็อกอิน) สำหรับหน้าจอนักเรียน */
+async function pullPublic(){
+  if(!sb) return null;
+  try{
+    const { data, error } = await sb.from("guild_state").select("data,updated_at")
+      .order("updated_at", { ascending:false }).limit(1).maybeSingle();
+    if(error) throw error;
+    return data;
+  }catch(e){ return null; }
+}
+async function initCloudSync(){
+  // ตรวจว่ามีเซสชันครูค้างอยู่ไหม (เผื่อเคยล็อกอินไว้แล้วยังไม่ออกจากระบบ)
+  if(!sb) return false;
+  const { data: { session } } = await sb.auth.getSession();
+  if(session && session.user){ syncUser = session.user; return true; }
+  return false;
+}
+async function afterLogin(){
+  $("#mAdmin").classList.remove("show");
+  enterTeacherMode();
+  setSyncStatus("pending");
+  const remote = await pullCloud();
+  const localTime = Number(localStorage.getItem(KEY+"-t") || 0);
+  if(remote && remote.data && remote.data.classes){
+    const remoteTime = new Date(remote.updated_at).getTime();
+    // last-write-wins: ใช้ก้อนที่ใหม่กว่า ถ้าในเครื่องยังไม่เคยบันทึกเวลาไว้ ให้ถือว่าของคลาวด์ใหม่กว่า
+    if(!localTime || remoteTime > localTime){
+      DB = remote.data;
+      DB.settings = Object.assign({sound:true, perLevel:10}, DB.settings || {});
+      DB.classes.forEach((c,i) => { if(!c.icon) c.icon = ROOM_ICONS[i % ROOM_ICONS.length]; });
+      toast("โหลดข้อมูลจากคลาวด์แล้ว");
+    }else{
+      toast("ข้อมูลในเครื่องใหม่กว่า กำลังอัปขึ้นคลาวด์");
+    }
+  }
+  setSyncStatus("ok");
+  goLobby();
+  await pushCloud();
+  localStorage.setItem(KEY+"-t", Date.now().toString());
+}
+/* ══════════ สลับบทบาท นักเรียน ↔ ครู ══════════ */
+function enterTeacherMode(){
+  appRole = "teacher";
+  if(rtChannel){ sb.removeChannel(rtChannel); rtChannel = null; }
+  ["#viewStuLobby","#viewStuBoard"].forEach(s => $(s).classList.add("hide"));
+  ["#btnSync","#btnSettings"].forEach(s => $(s).classList.remove("hide"));
+  $("#btnAdminOpen").classList.add("hide");
+  $("#brandSub").textContent = "เลือกห้องเรียนเพื่อเริ่มสะสมคริสตัล";
+}
+function enterStudentMode(){
+  appRole = "student";
+  ["#viewLobby","#viewRoom"].forEach(s => $(s).classList.add("hide"));
+  ["#btnBack","#classSel","#btnBig","#btnFull","#btnSync","#btnSettings"].forEach(s => $(s).classList.add("hide"));
+  $("#btnAdminOpen").classList.remove("hide");
+  $("#brandIcon").textContent = "⚜"; $("#brandName").textContent = "กิลด์ผู้กล้า";
+  $("#brandSub").textContent = "เลือกห้องเรียนเพื่อดูอันดับของคุณ";
+}
+
+/* ══════════ โหมดนักเรียน (อ่านอย่างเดียว) ══════════ */
+async function bootStudentMode(){
+  if(sb){
+    const remote = await pullPublic();
+    if(remote && remote.data && remote.data.classes){
+      DB = remote.data;
+      DB.settings = Object.assign({sound:true, perLevel:10}, DB.settings || {});
+      DB.classes.forEach((c,i) => { if(!c.icon) c.icon = ROOM_ICONS[i % ROOM_ICONS.length]; });
+    }
+    setupRealtime();
+  }
+  studentRenderLobby();
+}
+function stuShowSection(name){
+  ["#viewStuLobby","#viewStuBoard"].forEach(s => $(s).classList.add("hide"));
+  $("#view" + name).classList.remove("hide");
+}
+function studentRenderLobby(){
+  $("#brandIcon").textContent = "⚜"; $("#brandName").textContent = "กิลด์ผู้กล้า";
+  $("#brandSub").textContent = "เลือกห้องเรียนเพื่อดูอันดับ";
+  stuShowSection("StuLobby");
+  studentClassId = null;
+  $("#stuLobbyGrid").innerHTML = DB.classes.map(c => {
+    const total = c.students.reduce((a,s) => a+s.points, 0);
+    const champ = [...c.students].sort((a,b) => b.points-a.points)[0];
+    return `<div class="room-card" data-id="${c.id}" tabindex="0" role="button">
+      <div class="room-icon">${c.icon||"🏰"}</div><h3>${esc(c.name)}</h3>
+      <div class="room-meta">👥 ${c.students.length} คน · 💎 ${total} คริสตัล</div>
+      <div class="room-champ">${champ ? `🏆 ${champ.avatar} ${esc(champ.name)} <b style="margin-left:auto">${champ.points}</b>` : "ยังไม่มีรายชื่อในห้องนี้"}</div>
+      <div class="room-actions"><button class="btn gold grow">เข้าดูอันดับ</button></div>
+    </div>`;
+  }).join("") || `<div class="empty"><span class="ico">🏰</span><h3>ยังไม่มีห้องเรียน</h3><p>รอครูตั้งค่าห้องก่อนนะ</p></div>`;
+}
+$("#stuLobbyGrid").addEventListener("click", e => {
+  const card = e.target.closest(".room-card"); if(!card) return;
+  studentEnterClass(card.dataset.id);
+});
+$("#stuLobbyGrid").addEventListener("keydown", e => {
+  const card = e.target.closest(".room-card"); if(!card) return;
+  if(e.key === "Enter" || e.key === " "){ e.preventDefault(); studentEnterClass(card.dataset.id); }
+});
+function studentEnterClass(classId){
+  const c = DB.classes.find(x => x.id === classId); if(!c) return;
+  studentClassId = classId;
+  $("#brandIcon").textContent = c.icon || "🏰"; $("#brandName").textContent = c.name;
+  studentRenderBoard();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+function studentRenderBoard(){
+  const c = DB.classes.find(x => x.id === studentClassId); if(!c) return;
+  $("#brandSub").textContent = "กระดานเกียรติยศประจำห้อง";
+  stuShowSection("StuBoard");
+  const ranked = [...c.students].sort((a,b) => b.points-a.points || a.name.localeCompare(b.name,"th"));
+
+  if(ranked.length === 0){
+    $("#podiumStage").innerHTML = "";
+    $("#podiumBase").classList.add("hide");
+    $("#rankHeading").classList.add("hide");
+    $("#stuMeTag").textContent = "";
+    $("#stuGrid").innerHTML = `<div class="empty"><span class="ico">🏰</span><h3>ห้องนี้ยังไม่มีรายชื่อ</h3><p>รอครูเพิ่มนักเรียนก่อนนะ</p></div>`;
+    return;
+  }
+  $("#rankHeading").classList.remove("hide");
+  const total = c.students.reduce((a,s) => a+s.points, 0);
+  $("#stuMeTag").innerHTML = `👥 ${c.students.length} คน · 💎 รวม ${total} คริสตัล`;
+
+  // โพเดียม: เรียงซ้าย=อันดับ2, กลาง=อันดับ1, ขวา=อันดับ3
+  const top = ranked.slice(0,3);
+  const order = top.length >= 3 ? [1,0,2] : (top.length === 2 ? [1,0] : [0]);
+  const CROWN = ["👑","⚔️","🛡️"];
+  const RNAME = ["จ้าวแห่งคริสตัล","อัศวินรองบัลลังก์","ผู้พิทักษ์อันดับสาม"];
+  $("#podiumStage").innerHTML = order.map((idx,seq) => {
+    const s = top[idx]; if(!s) return "";
+    const L = levelOf(s.points);
+    return `<div class="pod p${idx+1}" style="animation-delay:${seq*160}ms">
+      <div class="crown">${CROWN[idx]}</div>
+      <div class="hero">${s.avatar}</div>
+      <div class="pillar">
+        <div class="medal-badge">${idx+1}</div>
+        <div class="prankname">${RNAME[idx]}</div>
+      </div>
+      <div class="pname">${esc(s.name)}</div>
+      <div class="pscore">${s.points}</div>
+      <div class="prank">${L.rank.icon} ${L.rank.name}</div>
+    </div>`;
+  }).join("");
+  $("#podiumBase").classList.remove("hide");
+
+  $("#stuGrid").innerHTML = ranked.map((s,i) => {
+    const L = levelOf(s.points);
+    const gems = Array.from({length:Math.min(L.per,20)},(_,gi)=>`<span class="gem${gi<L.filled?" on":""}"></span>`).join("");
+    return `<div class="card readonly">
+      <div class="card-band"><span class="rk">${L.rank.icon}</span><span>${L.rank.name} · Lv.${L.lv}</span>
+        <span class="no${i<3?" top":""}">#${i+1}</span></div>
+      <div class="card-body"><div class="ava">${s.avatar}</div><div class="nm">${esc(s.name)}</div>
+        <div class="score">${s.points}<span class="unit">คริสตัล</span></div><div class="gems">${gems}</div></div>
+    </div>`;
+  }).join("");
+}
+$("#btnStuBack2").addEventListener("click", studentRenderLobby);
+
+/* ══════════ Realtime: อัปเดตจอนักเรียนสดเมื่อครูให้แต้ม ══════════ */
+function setupRealtime(){
+  if(!sb || rtChannel) return;
+  rtChannel = sb.channel("guild_state_public")
+    .on("postgres_changes", { event: "UPDATE", schema: "public", table: "guild_state" }, payload => {
+      if(appRole !== "student" || !payload.new || !payload.new.data) return;
+      DB = payload.new.data;
+      DB.settings = Object.assign({sound:true, perLevel:10}, DB.settings || {});
+      if(!studentClassId) studentRenderLobby();
+      else studentRenderBoard();
+    })
+    .subscribe();
+}
+
+function levelOf(p){
+  const per = DB.settings.perLevel, lv = Math.floor(p/per)+1;
+  return {lv, rank: RANKS.find(r => lv >= r.min) || RANKS[RANKS.length-1], filled: p%per, per};
+}
+
+/* ══════════ เสียง ══════════ */
+let AC = null;
+function beep(freqs, type="sine", dur=.16, gain=.16){
+  if(!DB.settings.sound) return;
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)();
+    freqs.forEach((f,i) => {
+      const o = AC.createOscillator(), g = AC.createGain(), t = AC.currentTime + i*.09;
+      o.type = type; o.frequency.setValueAtTime(f,t);
+      g.gain.setValueAtTime(gain,t); g.gain.exponentialRampToValueAtTime(.001, t+dur);
+      o.connect(g); g.connect(AC.destination); o.start(t); o.stop(t+dur);
+    });
+  }catch(e){}
+}
+const sndPlus  = () => beep([880,1320],"triangle",.14);
+const sndMinus = () => beep([320,200],"sawtooth",.18,.1);
+const sndLevel = () => beep([523,659,784,1047],"triangle",.22,.18);
+const sndTick  = () => beep([1600],"square",.03,.05);
+const sndPop   = () => beep([700,1000],"triangle",.1,.12);
+const sndFanfare = () => beep([523,659,784,1047,1319],"triangle",.26,.2);
+const sndSelect  = () => beep([600,900],"square",.08,.1);
+const sndSteal   = () => beep([1200,900,600,400],"sawtooth",.13,.13);
+const sndFail    = () => beep([300,220,160],"sine",.22,.13);
+
+/* ══════════ เอฟเฟกต์ ══════════ */
+function fxFloat(x,y,text,neg){
+  const el = document.createElement("div");
+  el.className = "float" + (neg?" neg":"");
+  el.textContent = text; el.style.left = x+"px"; el.style.top = y+"px";
+  document.body.appendChild(el); setTimeout(() => el.remove(), 1000);
+}
+function fxSparks(x,y,n=10){
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  const colors = ["#FFD97A","#FF6B35","#9B7BFF","#3FBF8F","#FF7FA8"];
+  for(let i=0;i<n;i++){
+    const s = document.createElement("div");
+    s.className = "spark"; s.style.background = colors[i%colors.length];
+    s.style.left = x+"px"; s.style.top = y+"px";
+    document.body.appendChild(s);
+    const a = Math.random()*Math.PI*2, d = 50+Math.random()*90;
+    s.animate([{transform:"translate(-50%,-50%) scale(1)",opacity:1},
+      {transform:`translate(${Math.cos(a)*d-8}px,${Math.sin(a)*d-8}px) scale(0)`,opacity:0}],
+      {duration:650+Math.random()*350,easing:"cubic-bezier(.2,.7,.3,1)"});
+    setTimeout(() => s.remove(), 1000);
+  }
+}
+function fxFlyCrystal(fromEl, toEl, n=5){
+  if(!fromEl || !toEl) return;
+  const a = fromEl.getBoundingClientRect(), b = toEl.getBoundingClientRect();
+  for(let i=0;i<n;i++){
+    const c = document.createElement("div");
+    c.className = "crystal"; c.textContent = "💎";
+    c.style.left = (a.left + a.width/2) + "px";
+    c.style.top  = (a.top + a.height/2) + "px";
+    document.body.appendChild(c);
+    const dx = (b.left + b.width/2) - (a.left + a.width/2);
+    const dy = (b.top + b.height/2) - (a.top + a.height/2);
+    c.animate([
+      {transform:"translate(-50%,-50%) scale(.4) rotate(0deg)",opacity:0},
+      {transform:`translate(${dx*.45-20+Math.random()*40}px,${dy*.45-60}px) scale(1.3) rotate(180deg)`,opacity:1,offset:.5},
+      {transform:`translate(${dx}px,${dy}px) scale(.5) rotate(360deg)`,opacity:0}
+    ],{duration:800+i*90,easing:"cubic-bezier(.3,.1,.3,1)",delay:i*70});
+    setTimeout(() => c.remove(), 1100+i*90);
+  }
+}
+/* ══════════ หน่วงการจัดอันดับ 3 วินาที ══════════ */
+function freezeOrder(){
+  if(mode !== "solo") return;
+  if(!orderFreeze){
+    orderFreeze = [...document.querySelectorAll("#grid .card")].map(c => c.dataset.id);
+    if(orderFreeze.length === 0){ orderFreeze = null; return; }
+  }
+  let left = 3;
+  $("#reorderTip").classList.remove("hide");
+  $("#reorderSec").textContent = left;
+  clearInterval(freezeTick); clearTimeout(freezeTimer);
+  freezeTick = setInterval(() => { left--; $("#reorderSec").textContent = Math.max(0,left); }, 1000);
+  freezeTimer = setTimeout(() => {
+    clearInterval(freezeTick);
+    $("#reorderTip").classList.add("hide");
+    orderFreeze = null;
+    flipRender();
+  }, 3000);
+}
+function clearFreeze(){
+  clearInterval(freezeTick); clearTimeout(freezeTimer);
+  orderFreeze = null; $("#reorderTip").classList.add("hide");
+}
+/* จัดอันดับใหม่พร้อมอนิเมชันเลื่อนการ์ด */
+function flipRender(){
+  const before = new Map();
+  document.querySelectorAll("#grid .card").forEach(c => before.set(c.dataset.id, c.getBoundingClientRect()));
+  renderGrid(); renderBoard();
+  if(matchMedia("(prefers-reduced-motion:reduce)").matches) return;
+  document.querySelectorAll("#grid .card").forEach(c => {
+    const f = before.get(c.dataset.id); if(!f) return;
+    const l = c.getBoundingClientRect();
+    const dx = f.left - l.left, dy = f.top - l.top;
+    if(Math.abs(dx) < 1 && Math.abs(dy) < 1) return;
+    c.animate([{transform:`translate(${dx}px,${dy}px)`},{transform:"none"}],
+      {duration:650, easing:"cubic-bezier(.2,.9,.25,1)"});
+  });
+  sndPop();
+}
+
+function showBanner(html){
+  const b = $("#banner"); b.innerHTML = html; b.classList.add("show");
+  clearTimeout(b._t); b._t = setTimeout(() => b.classList.remove("show"), 2800);
+}
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove("show"), 2200);
+}
+
+/* ══════════ สลับหน้าจอ ══════════ */
+function goLobby(){
+  view = "lobby"; mode = "solo"; groupEdit = false; query = ""; $("#search").value = "";
+  heistOff(true); clearFreeze();
+  $("#viewLobby").classList.remove("hide"); $("#viewRoom").classList.add("hide");
+  ["#btnBack","#classSel","#btnBig","#btnFull"].forEach(s => $(s).classList.add("hide"));
+  $("#brandIcon").textContent = "⚜"; $("#brandName").textContent = "กิลด์ผู้กล้า";
+  $("#brandSub").textContent = "เลือกห้องเรียนเพื่อเริ่มสะสมคริสตัล";
+  render();
+}
+function goRoom(id){
+  const c = DB.classes.find(x => x.id === id);
+  if(!c){ goLobby(); return; }
+  DB.activeId = id; view = "room"; mode = "solo"; groupEdit = false; query = ""; $("#search").value = "";
+  heistOff(true); clearFreeze(); heistLog = [];
+  $("#viewLobby").classList.add("hide"); $("#viewRoom").classList.remove("hide");
+  ["#btnBack","#classSel","#btnBig","#btnFull"].forEach(s => $(s).classList.remove("hide"));
+  $("#brandIcon").textContent = c.icon || "🏰";
+  $("#brandName").textContent = c.name;
+  $("#brandSub").textContent = "กระดานสะสมคริสตัลประจำห้อง";
+  save(); render(); window.scrollTo({top:0,behavior:"smooth"});
+}
+$("#btnBack").addEventListener("click", goLobby);
+$("#classSel").addEventListener("change", e => goRoom(e.target.value));
+
+function setMode(m){
+  mode = m; const g = m === "group";
+  heistOff(true); clearFreeze();
+  $("#toolSolo").classList.toggle("hide", g);
+  $("#toolGroup").classList.toggle("hide", !g);
+  $("#grid").classList.toggle("hide", g);
+  $("#ggrid").classList.toggle("hide", !g);
+  $("#boardTitle").textContent = g ? "🏆 คะแนนกิจกรรมกลุ่ม" : "🏆 แท่นเกียรติยศ";
+  $("#brandSub").textContent = g ? "กำลังทำกิจกรรมกลุ่ม" : "กระดานสะสมคริสตัลประจำห้อง";
+  render();
+}
+
+/* ══════════ วาดหน้าจอ ══════════ */
+function render(){
+  if(view === "lobby"){ renderLobby(); return; }
+  if(!activeClass()){ goLobby(); return; }
+  renderClassSel();
+  if(mode === "group"){ renderGroups(); renderGroupBoard(); }
+  else{ renderGrid(); renderBoard(); }
+  renderStats(); renderLog();
+}
+function renderLobby(){
+  $("#lobbyGrid").innerHTML = DB.classes.map(c => {
+    const total = c.students.reduce((a,s) => a+s.points, 0);
+    const champ = [...c.students].sort((a,b) => b.points-a.points)[0];
+    return `<div class="room-card" data-id="${c.id}" tabindex="0" role="button">
+      <div class="room-icon">${c.icon||"🏰"}</div><h3>${esc(c.name)}</h3>
+      <div class="room-meta">👥 ${c.students.length} คน · 💎 ${total} คริสตัล${c.groups?" · 👫 มีกลุ่มค้างไว้":""}</div>
+      <div class="room-champ">${champ ? `🏆 ${champ.avatar} ${esc(champ.name)} <b style="margin-left:auto">${champ.points}</b>` : "ยังไม่มีนักเรียนในห้องนี้"}</div>
+      <div class="room-actions">
+        <button class="btn gold grow" data-ract="enter">เข้าห้อง</button>
+        <button class="btn" data-ract="edit">✏️</button>
+        <button class="btn danger" data-ract="del">🗑</button>
+      </div></div>`;
+  }).join("") + `<button class="new-room" id="btnNewRoom"><span>➕</span><b>สร้างห้องเรียนใหม่</b></button>`;
+}
+function renderClassSel(){
+  $("#classSel").innerHTML = DB.classes.map(c =>
+    `<option value="${c.id}"${c.id===DB.activeId?" selected":""}>${esc(c.icon||"🏰")} ${esc(c.name)} (${c.students.length})</option>`).join("");
+}
+
+/* ผู้ที่ถูกเกราะคุ้มครอง */
+function guardedSet(){
+  const cls = activeClass(), set = new Set();
+  if(!heist.on || heist.guard === 0 || !cls) return set;
+  if(mode === "group"){
+    if(!cls.groups) return set;
+    const gs = [...cls.groups.list].filter(g => g.members.length);
+    if(heist.guard === 1){
+      [...gs].sort((a,b) => a.session-b.session).slice(0,Math.min(2,Math.max(0,gs.length-1))).forEach(g => set.add(g.id));
+    }else{
+      const avg = gs.reduce((a,g) => a+g.session,0)/(gs.length||1);
+      gs.forEach(g => { if(g.session < avg) set.add(g.id); });
+    }
+    return set;
+  }
+  const ss = cls.students;
+  if(heist.guard === 1){
+    [...ss].sort((a,b) => a.points-b.points).slice(0, Math.min(3, Math.max(0, ss.length-1))).forEach(s => set.add(s.id));
+  }else{
+    const avg = ss.reduce((a,s) => a+s.points,0)/(ss.length||1);
+    ss.forEach(s => { if(s.points < avg) set.add(s.id); });
+  }
+  return set;
+}
+
+function renderGrid(){
+  const grid = $("#grid"), cls = activeClass();
+  if(cls.students.length === 0){
+    grid.innerHTML = `<div class="empty"><span class="ico">🏰</span><h3>ห้องนี้ยังไม่มีนักเรียน</h3>
+      <p>เพิ่มรายชื่อเพื่อเริ่มสะสมคริสตัล</p>
+      <button class="btn gold" onclick="document.getElementById('btnAdd').click()">+ เพิ่มนักเรียน</button></div>`;
+    return;
+  }
+  const guard = guardedSet();
+  const ranked = [...cls.students].sort((a,b) => b.points-a.points);
+  const rankMap = new Map(); ranked.forEach((s,i) => rankMap.set(s.id, i+1));
+  let list = cls.students.filter(s => !query || s.name.toLowerCase().includes(query));
+  if(orderFreeze){
+    const pos = new Map(orderFreeze.map((id,i) => [id,i]));
+    list.sort((a,b) => (pos.has(a.id)?pos.get(a.id):9999) - (pos.has(b.id)?pos.get(b.id):9999));
+  }
+  else if(sortBy === "score") list.sort((a,b) => b.points-a.points || a.name.localeCompare(b.name,"th"));
+  else if(sortBy === "name") list.sort((a,b) => a.name.localeCompare(b.name,"th"));
+  if(list.length === 0){
+    grid.innerHTML = `<div class="empty"><span class="ico">🔍</span><h3>ไม่พบชื่อที่ค้นหา</h3><p>ลองพิมพ์คำอื่น</p></div>`;
+    return;
+  }
+  grid.innerHTML = list.map(s => {
+    const L = levelOf(s.points), pos = rankMap.get(s.id);
+    const gems = Array.from({length:Math.min(L.per,20)},(_,i)=>`<span class="gem${i<L.filled?" on":""}"></span>`).join("");
+    const isThief = heist.on && heist.thief === s.id;
+    const isSafe = heist.on && !isThief && guard.has(s.id);
+    return `<div class="card${isThief?" thiefsel":""}${isSafe?" safe":""}" data-id="${s.id}" tabindex="0" role="button">
+      ${isThief?`<span class="thiefmark">🥷</span>`:""}
+      <div class="card-band"><span class="rk">${L.rank.icon}</span><span>${L.rank.name} · Lv.${L.lv}</span>
+        <span class="no${pos<=3?" top":""}">#${pos}</span></div>
+      <div class="card-body"><div class="ava">${s.avatar}</div><div class="nm">${esc(s.name)}</div>
+        <div class="score">${s.points}<span class="unit">คริสตัล</span></div><div class="gems">${gems}</div></div>
+      <div class="card-foot"><button class="mini sub" data-act="sub">−1</button>
+        <button class="mini" data-act="edit">✏️</button></div></div>`;
+  }).join("");
+}
+
+function renderGroups(reveal){
+  const cls = activeClass(), box = $("#ggrid");
+  if(!cls.groups){ setMode("solo"); return; }
+  const guard = guardedSet();
+  const byId = new Map(cls.students.map(s => [s.id, s]));
+  const assigned = new Set(cls.groups.list.flatMap(g => g.members));
+  const pool = cls.students.filter(s => !assigned.has(s.id));
+  const cards = cls.groups.list.map((g,i) => {
+    const ms = g.members.map(id => byId.get(id)).filter(Boolean);
+    const isThief = heist.on && heist.thief === g.id;
+    const isSafe = heist.on && !isThief && guard.has(g.id);
+    return `<div class="gcard${groupEdit?" editing":""}${reveal?" reveal":""}${isThief?" thiefsel":""}${isSafe?" safe":""}"
+      data-gid="${g.id}" tabindex="0" role="button" style="--gc:${g.color};${reveal?`animation-delay:${i*160}ms`:""}">
+      ${isThief?`<span class="thiefmark">🥷</span>`:""}
+      <div class="gcard-head"><div class="gi">${g.icon}</div>
+        <div class="gn">${esc(g.name)}<small>${ms.length} คน</small></div><div class="gs">${g.session}</div></div>
+      <div class="gmembers">${ms.length ? ms.map(s =>
+        `<span class="mchip" data-sid="${s.id}"><span class="ma">${s.avatar}</span><span class="mn">${esc(s.name)}</span></span>`).join("")
+        : `<span style="font-size:13px;color:#9A8FC9">ยังไม่มีสมาชิก</span>`}</div>
+      ${groupEdit ? `<div class="gcard-foot">
+        <button class="gmini" data-gact="rename">✏️ เปลี่ยนชื่อ</button>
+        <button class="gmini" data-gact="delg">🗑 ลบกลุ่ม</button></div>` : ""}</div>`;
+  }).join("");
+  const poolCard = pool.length ? `<div class="gcard gpool${groupEdit?" editing":""}" data-gid="__pool">
+      <div class="gcard-head" style="--gc:rgba(232,179,60,.25)"><div class="gi">🕰️</div>
+        <div class="gn">ยังไม่มีกลุ่ม<small>${pool.length} คน</small></div></div>
+      <div class="gmembers">${pool.map(s =>
+        `<span class="mchip" data-sid="${s.id}"><span class="ma">${s.avatar}</span><span class="mn">${esc(s.name)}</span></span>`).join("")}</div>
+    </div>` : "";
+  box.innerHTML = cards + poolCard;
+}
+
+function renderBoard(){
+  const cls = activeClass(), box = $("#board");
+  if(cls.students.length === 0){ box.innerHTML = `<p style="color:#8F84BE;font-size:13px;margin:0">ยังไม่มีข้อมูล</p>`; return; }
+  const top = [...cls.students].sort((a,b) => b.points-a.points).slice(0,5);
+  const max = Math.max(1, top[0].points), medals = ["🥇","🥈","🥉","4️⃣","5️⃣"];
+  box.innerHTML = top.map((s,i) => `<div class="rank-row ${i===0?"me1":""}"><div class="medal">${medals[i]}</div>
+    <div style="flex:1;min-width:0"><div style="display:flex;gap:8px;align-items:center">
+      <span class="rn">${s.avatar} ${esc(s.name)}</span><span class="rp">${s.points}</span></div>
+      <div class="bar"><i style="width:${Math.round(s.points/max*100)}%"></i></div></div></div>`).join("");
+}
+function renderGroupBoard(){
+  const cls = activeClass(), box = $("#board");
+  if(!cls.groups){ box.innerHTML = ""; return; }
+  const top = [...cls.groups.list].sort((a,b) => b.session-a.session);
+  const max = Math.max(1, top[0] ? top[0].session : 1), medals = ["🥇","🥈","🥉","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟"];
+  box.innerHTML = top.map((g,i) => `<div class="rank-row ${i===0&&g.session>0?"me1":""}"><div class="medal">${medals[i]||"·"}</div>
+    <div style="flex:1;min-width:0"><div style="display:flex;gap:8px;align-items:center">
+      <span class="rn">${g.icon} ${esc(g.name)}</span><span class="rp">${g.session}</span></div>
+      <div class="bar"><i style="width:${Math.round(g.session/max*100)}%"></i></div></div></div>`).join("");
+}
+function renderStats(){
+  const cls = activeClass(), n = cls.students.length;
+  const total = cls.students.reduce((a,s) => a+s.points, 0);
+  const avg = n ? (total/n).toFixed(1) : "0";
+  const legends = cls.students.filter(s => levelOf(s.points).lv >= 10).length;
+  $("#stats").innerHTML = `
+    <div class="stat"><b>${n}</b><span>นักเรียนในห้อง</span></div>
+    <div class="stat"><b>${total}</b><span>คริสตัลรวม</span></div>
+    <div class="stat"><b>${avg}</b><span>เฉลี่ยต่อคน</span></div>
+    <div class="stat"><b>${legends}</b><span>ระดับจอมเวทขึ้นไป</span></div>`;
+}
+function renderLog(){
+  $("#logPanel").classList.toggle("hide", heistLog.length === 0);
+  $("#logBox").innerHTML = heistLog.slice(0,6).map(l => `<div class="logline">${l}</div>`).join("");
+}
+
+/* ══════════ ให้แต้ม ══════════ */
+function pushUndo(entry){ undoStack.push(entry); if(undoStack.length > 60) undoStack.shift(); }
+
+function addPoints(id, amount, ev){
+  const cls = activeClass(); if(!cls) return;
+  const st = cls.students.find(s => s.id === id); if(!st) return;
+  const before = levelOf(st.points).lv, old = st.points;
+  st.points = Math.max(0, st.points + amount);
+  const real = st.points - old;
+  if(real === 0){ toast("แต้มต่ำสุดคือ 0 แล้ว"); return; }
+  pushUndo({classId:cls.id, changes:[{id, delta:real}], groups:[], label:`${real>0?"+":""}${real} ของ ${st.name}`});
+  freezeOrder();
+  const after = levelOf(st.points).lv;
+  const card = document.querySelector(`.card[data-id="${id}"]`);
+  const r = card ? card.getBoundingClientRect() : {left:innerWidth/2, top:innerHeight/2, width:0, height:0};
+  const x = ev ? ev.clientX : r.left+r.width/2, y = ev ? ev.clientY : r.top+r.height/2;
+  fxFloat(x, y-10, (real>0?"+":"")+real, real<0);
+  real > 0 ? (fxSparks(x,y), sndPlus()) : sndMinus();
+  render();
+  const nc = document.querySelector(`.card[data-id="${id}"]`);
+  if(nc){
+    nc.classList.add("pop"); setTimeout(() => nc.classList.remove("pop"), 350);
+    if(after > before){
+      nc.classList.add("levelup"); setTimeout(() => nc.classList.remove("levelup"), 800);
+      sndLevel(); fxSparks(x,y,26);
+      showBanner(`<span class="big">${levelOf(st.points).rank.icon}</span><span><b>${esc(st.name)}</b> เลื่อนขั้นเป็น <b>${levelOf(st.points).rank.name}</b> แล้ว!</span>`);
+    }
+  }
+  save();
+}
+function addGroupPoints(gid, amount, ev){
+  const cls = activeClass();
+  const g = cls.groups.list.find(x => x.id === gid); if(!g) return;
+  if(g.members.length === 0){ toast("กลุ่มนี้ยังไม่มีสมาชิก"); return; }
+  const byId = new Map(cls.students.map(s => [s.id, s]));
+  const changes = [];
+  g.members.forEach(id => {
+    const s = byId.get(id); if(!s) return;
+    const old = s.points; s.points = Math.max(0, s.points + amount);
+    if(s.points !== old) changes.push({id, delta: s.points-old});
+  });
+  if(changes.length === 0){ toast("แต้มต่ำสุดคือ 0 แล้ว"); return; }
+  g.session = Math.max(0, g.session + amount);
+  pushUndo({classId:cls.id, changes, groups:[{gid, delta:amount}], label:`${amount>0?"+":""}${amount} ให้ ${g.name}`});
+  const card = document.querySelector(`.gcard[data-gid="${gid}"]`);
+  const r = card ? card.getBoundingClientRect() : {left:innerWidth/2, top:innerHeight/2, width:0, height:0};
+  const x = ev ? ev.clientX : r.left+r.width/2, y = ev ? ev.clientY : r.top+r.height/2;
+  fxFloat(x, y-10, `${amount>0?"+":""}${amount} × ${changes.length}`, amount<0);
+  amount > 0 ? (fxSparks(x,y,16), sndPlus()) : sndMinus();
+  render();
+  const nc = document.querySelector(`.gcard[data-gid="${gid}"]`);
+  if(nc){ nc.classList.add("pop"); setTimeout(() => nc.classList.remove("pop"), 350); }
+  save();
+}
+function undo(){
+  const last = undoStack.pop();
+  if(!last){ toast("ไม่มีรายการให้ย้อนกลับ"); return; }
+  const cls = DB.classes.find(c => c.id === last.classId);
+  if(!cls){ toast("ไม่พบห้องนี้แล้ว"); return; }
+  const byId = new Map(cls.students.map(s => [s.id, s]));
+  last.changes.forEach(ch => { const s = byId.get(ch.id); if(s) s.points = Math.max(0, s.points - ch.delta); });
+  (last.groups||[]).forEach(gg => {
+    if(!cls.groups) return;
+    const g = cls.groups.list.find(x => x.id === gg.gid);
+    if(g) g.session = Math.max(0, g.session - gg.delta);
+  });
+  if(last.isHeist) heistLog.shift();
+  clearFreeze(); render(); save(); toast("ย้อนกลับ: " + last.label);
+}
+
+/* ══════════ โหมดโจรกรรม ══════════ */
+$("#btnHeist").addEventListener("click", () => $("#mHeist").classList.add("show"));
+$("#btnHeistG").addEventListener("click", () => $("#mHeist").classList.add("show"));
+$("#btnHeistCfg").addEventListener("click", () => $("#mHeist").classList.add("show"));
+$("#hAmt").addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if(!b) return;
+  heist.amount = parseInt(b.dataset.v,10);
+  [...$("#hAmt").children].forEach(c => c.classList.toggle("on", c===b));
+});
+$("#hRoll").addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if(!b) return;
+  heist.guessCount = parseInt(b.dataset.r,10);
+  [...$("#hRoll").children].forEach(c => c.classList.toggle("on", c===b));
+});
+$("#hGuard").addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if(!b) return;
+  heist.guard = parseInt(b.dataset.g,10);
+  [...$("#hGuard").children].forEach(c => c.classList.toggle("on", c===b));
+});
+$("#btnHeistStart").addEventListener("click", () => {
+  const cls = activeClass();
+  if(mode === "group"){
+    if(!cls.groups || cls.groups.list.filter(g => g.members.length).length < 2){ toast("ต้องมีอย่างน้อย 2 กลุ่มที่มีสมาชิก"); return; }
+  }else if(cls.students.length < 2){ toast("ต้องมีนักเรียนอย่างน้อย 2 คน"); return; }
+  heist.on = true; heist.thief = null;
+  $("#mHeist").classList.remove("show");
+  $("#heistBar").classList.remove("hide");
+  $("#heistAmtTxt").textContent = heist.amount;
+  document.body.classList.add("heist-on");
+  updateHeistStep();
+  render();
+  toast(mode === "group" ? "เลือกกลุ่มผู้ลงมือก่อน" : "เลือกนักเรียนผู้ลงมือก่อน");
+});
+function updateHeistStep(){
+  const cls = activeClass();
+  if(!heist.thief){ $("#heistStep").innerHTML = `ขั้นที่ 1 — เลือก <b>ผู้ลงมือ</b>`; return; }
+  let nm = "";
+  if(mode === "group"){ const g = cls.groups.list.find(x => x.id === heist.thief); nm = g ? g.icon+" "+g.name : ""; }
+  else{ const s = cls.students.find(x => x.id === heist.thief); nm = s ? s.avatar+" "+s.name : ""; }
+  $("#heistStep").innerHTML = `ขั้นที่ 2 — <b>${esc(nm)}</b> จะขโมยจากใคร?`;
+}
+function heistOff(silent){
+  heist.on = false; heist.thief = null;
+  $("#heistBar").classList.add("hide");
+  document.body.classList.remove("heist-on");
+  if(!silent){ render(); toast("ออกจากโหมดโจรกรรมแล้ว"); }
+}
+$("#btnHeistOff").addEventListener("click", () => heistOff(false));
+
+function heistPick(id){
+  const cls = activeClass();
+  if(!heist.thief){
+    heist.thief = id; sndSelect(); updateHeistStep(); render();
+    return;
+  }
+  if(heist.thief === id){ heist.thief = null; sndPop(); updateHeistStep(); render(); return; }
+  if(guardedSet().has(id)){ toast("🛡️ เป้าหมายนี้ถูกเกราะคุ้มครองอยู่"); sndFail(); return; }
+  runHeist(heist.thief, id);
+}
+
+function heistNames(id){
+  const cls = activeClass();
+  if(mode === "group"){ const g = cls.groups.list.find(x => x.id === id); return g ? {icon:g.icon, name:g.name} : {icon:"?",name:"?"}; }
+  const s = cls.students.find(x => x.id === id); return s ? {icon:s.avatar, name:s.name} : {icon:"?",name:"?"};
+}
+
+function runHeist(thiefId, targetId){
+  const A = heistNames(thiefId), B = heistNames(targetId);
+  heistPair = {thiefId, targetId};
+  heistGuess = new Set();
+  $("#drawOverlay").classList.add("show","heistbg");
+  $("#vsBox").classList.remove("hide");
+  $("#vsBox").innerHTML = `<div class="who"><i>${A.icon}</i>${esc(A.name)}</div>
+    <div class="mid">🥷 ปล้น →</div><div class="who"><i>${B.icon}</i>${esc(B.name)}</div>`;
+  $("#drawRing").classList.add("hide");
+  $("#drawResult").innerHTML = ""; $("#drawActions").classList.add("hide");
+  clearInterval(rollTimer);
+
+  if(heist.guessCount === 0){
+    $("#drawTitle").textContent = "🥷 ลงมือทันที!";
+    $("#heistPick").classList.add("hide");
+    $("#roulette").classList.remove("hide");
+    $("#roulette").innerHTML = `<div class="dice">🥷</div>`;
+    setTimeout(() => finishHeist(thiefId, targetId, true, 0), 1100);
+    return;
+  }
+  // โหมดทายเลข
+  $("#drawTitle").textContent = "🎲 ทายเลขลูกเต๋าก่อนลงมือ";
+  $("#roulette").classList.add("hide");
+  $("#heistPick").classList.remove("hide");
+  $("#guessTip").innerHTML = `${esc(A.name)} เลือก <b>${heist.guessCount}</b> เลข ที่คิดว่าลูกเต๋าจะออก`;
+  $("#dicePick").innerHTML = [1,2,3,4,5,6].map(n =>
+    `<button class="dicebtn" data-n="${n}" title="เลข ${n}">${DICE[n]}</button>`).join("");
+  updateRollBtn();
+}
+function updateRollBtn(){
+  const need = heist.guessCount, got = heistGuess.size;
+  const b = $("#btnRollDice");
+  b.disabled = got !== need;
+  b.style.opacity = got === need ? "1" : ".45";
+  b.textContent = got === need ? "🎲 ทอยลูกเต๋า!" : `เลือกอีก ${need-got} เลข`;
+}
+$("#dicePick").addEventListener("click", e => {
+  const b = e.target.closest(".dicebtn"); if(!b) return;
+  const n = parseInt(b.dataset.n,10);
+  if(heistGuess.has(n)) heistGuess.delete(n);
+  else{
+    if(heistGuess.size >= heist.guessCount){ toast(`เลือกได้แค่ ${heist.guessCount} เลข แตะเลขเดิมเพื่อยกเลิก`); return; }
+    heistGuess.add(n);
+  }
+  sndSelect();
+  [...$("#dicePick").children].forEach(c => c.classList.toggle("on", heistGuess.has(parseInt(c.dataset.n,10))));
+  updateRollBtn();
+});
+$("#btnRollDice").addEventListener("click", () => {
+  if(heistGuess.size !== heist.guessCount || !heistPair) return;
+  const {thiefId, targetId} = heistPair;
+  const picked = [...heistGuess].sort((a,b) => a-b);
+  $("#heistPick").classList.add("hide");
+  $("#roulette").classList.remove("hide");
+  $("#drawTitle").innerHTML = `ทายไว้ว่า ${picked.map(n => DICE[n]).join(" ")}`;
+  clearInterval(rollTimer);
+  let ticks = 0;
+  rollTimer = setInterval(() => {
+    $("#roulette").innerHTML = `<div class="dice">${DICE[1+Math.floor(Math.random()*6)]}</div>`;
+    sndTick(); ticks++;
+    if(ticks > 18){
+      clearInterval(rollTimer);
+      const face = 1 + Math.floor(Math.random()*6);
+      $("#roulette").innerHTML = `<div class="finalface">${DICE[face]}</div>`;
+      setTimeout(() => finishHeist(thiefId, targetId, heistGuess.has(face), face), 800);
+    }
+  }, 100);
+});
+
+function finishHeist(thiefId, targetId, ok, face){
+  const cls = activeClass();
+  const A = heistNames(thiefId), B = heistNames(targetId);
+  const faceTxt = face ? ` (ออก ${DICE[face]})` : "";
+  $("#roulette").classList.add("hide");
+  if(!ok){
+    $("#drawTitle").textContent = "";
+    $("#drawResult").innerHTML = `<div style="grid-column:1/-1;text-align:center" class="hres no">
+      <div style="font-size:1.6em;margin-bottom:8px">${DICE[face]}</div>💨 ทายผิด ปล้นไม่สำเร็จ!
+      <span class="sub2">${esc(A.name)} ไม่ได้คริสตัลจาก ${esc(B.name)}</span></div>`;
+    sndFail();
+    heistLog.unshift(`💨 <b>${esc(A.name)}</b> ปล้น ${esc(B.name)} ไม่สำเร็จ${faceTxt}`);
+    renderLog();
+    setTimeout(closeHeistOverlay, 2200);
+    return;
+  }
+  // คำนวณจำนวนที่ขโมยได้จริง
+  let changes = [], groups = [], moved = 0;
+  const byId = new Map(cls.students.map(s => [s.id, s]));
+  if(mode === "group"){
+    const tg = cls.groups.list.find(g => g.id === targetId);
+    const ag = cls.groups.list.find(g => g.id === thiefId);
+    tg.members.forEach(id => {
+      const s = byId.get(id); if(!s) return;
+      const take = Math.min(heist.amount, s.points);
+      if(take > 0){ s.points -= take; changes.push({id, delta:-take}); moved += take; }
+    });
+    ag.members.forEach(id => {
+      const s = byId.get(id); if(!s) return;
+      s.points += heist.amount; changes.push({id, delta:heist.amount});
+    });
+    const gt = Math.min(heist.amount, tg.session);
+    tg.session -= gt; ag.session += heist.amount;
+    groups = [{gid:targetId, delta:-gt},{gid:thiefId, delta:heist.amount}];
+  }else{
+    const t = cls.students.find(s => s.id === targetId);
+    const a = cls.students.find(s => s.id === thiefId);
+    moved = Math.min(heist.amount, t.points);
+    if(moved > 0){ t.points -= moved; changes.push({id:targetId, delta:-moved}); }
+    a.points += moved; if(moved > 0) changes.push({id:thiefId, delta:moved});
+  }
+  if(changes.length === 0){
+    $("#drawResult").innerHTML = `<div style="grid-column:1/-1;text-align:center" class="hres no">🕳️ กระเป๋าว่างเปล่า!
+      <span class="sub2">${esc(B.name)} ไม่มีคริสตัลให้ขโมยแล้ว</span></div>`;
+    sndFail(); setTimeout(closeHeistOverlay, 1900); return;
+  }
+  pushUndo({classId:cls.id, changes, groups, isHeist:true, label:`${A.name} ปล้น ${B.name}`});
+  freezeOrder();
+  const amt = mode === "group" ? heist.amount + " ต่อคน" : moved;
+  $("#drawTitle").textContent = "";
+  $("#drawResult").innerHTML = `<div style="grid-column:1/-1;text-align:center" class="hres ok">
+    ${face ? `<div style="font-size:1.6em;margin-bottom:8px">${DICE[face]}</div>🎯 ทายถูก! ` : ""}💎 ปล้นสำเร็จ!
+    <span class="sub2">${esc(A.name)} ชิงคริสตัลจาก ${esc(B.name)} ไปได้ <b>${amt}</b></span></div>`;
+  sndSteal();
+  heistLog.unshift(`💎 <b>${esc(A.name)}</b> ปล้น ${esc(B.name)} ได้ ${amt} คริสตัล${faceTxt}`);
+  save();
+  setTimeout(() => {
+    closeHeistOverlay();
+    const sel = mode === "group" ? "gcard" : "card", attr = mode === "group" ? "data-gid" : "data-id";
+    const tEl = document.querySelector(`.${sel}[${attr}="${targetId}"]`);
+    const aEl = document.querySelector(`.${sel}[${attr}="${thiefId}"]`);
+    if(tEl){ tEl.classList.add("robbed"); setTimeout(() => tEl.classList.remove("robbed"), 600); }
+    fxFlyCrystal(tEl, aEl, 6);
+    if(aEl){ setTimeout(() => { aEl.classList.add("pop"); const r = aEl.getBoundingClientRect();
+      fxSparks(r.left+r.width/2, r.top+r.height/2, 18); }, 700); }
+  }, 1700);
+}
+function closeHeistOverlay(){
+  $("#drawOverlay").classList.remove("show","heistbg");
+  $("#vsBox").classList.add("hide"); $("#heistPick").classList.add("hide");
+  heistPair = null; heistGuess = new Set();
+  heist.thief = null; updateHeistStep(); render();
+}
+
+/* ══════════ สร้างกลุ่ม ══════════ */
+function buildGroups(){
+  const cls = activeClass(), students = cls.students;
+  if(students.length < 2) return null;
+  let count;
+  if(gType === "pair") count = Math.floor(students.length/2) || 1;
+  else if(gType === "size"){
+    const size = Math.max(2, parseInt($("#gVal").value,10) || 4);
+    count = Math.max(1, Math.floor(students.length/size));
+  }else count = Math.min(students.length, Math.max(2, parseInt($("#gVal").value,10) || 4));
+  const buckets = Array.from({length:count}, () => []);
+  if(gMix === "balance"){
+    [...students].sort((a,b) => b.points-a.points || Math.random()-.5).forEach((s,i) => {
+      const round = Math.floor(i/count), pos = i%count;
+      buckets[round % 2 === 0 ? pos : count-1-pos].push(s.id);
+    });
+  }else shuffle(students).forEach((s,i) => buckets[i%count].push(s.id));
+  const names = shuffle(PARTY);
+  return {createdAt:Date.now(), type:gType, mix:gMix,
+    list: buckets.map((m,i) => ({id:uid(), name:"ปาร์ตี้"+names[i%names.length].n, icon:names[i%names.length].i,
+      color:names[i%names.length].c, members:m, session:0}))};
+}
+
+/* ══════════ ฉากลุ้นสุ่ม ══════════ */
+function startDraw(kind){
+  const cls = activeClass();
+  if(!cls || cls.students.length < 2){ toast("ต้องมีนักเรียนอย่างน้อย 2 คน"); return; }
+  drawKind = kind;
+  $("#mGroup").classList.remove("show");
+  $("#vsBox").classList.add("hide"); $("#heistPick").classList.add("hide");
+  $("#drawResult").innerHTML = ""; $("#drawActions").classList.add("hide");
+  $("#drawRing").classList.remove("hide"); $("#roulette").classList.remove("hide");
+  $("#drawTitle").textContent = kind === "one" ? "🎯 ใครจะถูกเลือกนะ..." : "🎲 กำลังเสี่ยงทายจัดกลุ่ม...";
+  $("#drawOverlay").classList.add("show");
+  const names = cls.students.map(s => `${s.avatar} ${s.name}`);
+  let left = kind === "one" ? 4 : gSecs;
+  $("#drawRing").textContent = left;
+  clearInterval(rollTimer); clearInterval(countTimer);
+  rollTimer = setInterval(() => { $("#roulette").textContent = names[Math.floor(Math.random()*names.length)]; sndTick(); }, 85);
+  countTimer = setInterval(() => {
+    left--; $("#drawRing").textContent = Math.max(0,left);
+    if(left <= 0){ clearInterval(rollTimer); clearInterval(countTimer); kind === "one" ? revealOne() : revealGroups(); }
+  }, 1000);
+}
+function revealOne(){
+  const cls = activeClass();
+  const s = cls.students[Math.floor(Math.random()*cls.students.length)];
+  $("#drawTitle").textContent = "✨ ผู้ถูกเลือกคือ";
+  $("#roulette").classList.add("hide"); $("#drawRing").classList.add("hide");
+  $("#drawResult").innerHTML = `<div style="grid-column:1/-1;text-align:center" class="winner"><span class="wa">${s.avatar}</span>${esc(s.name)}</div>`;
+  $("#drawActions").classList.remove("hide");
+  $("#btnDrawOk").textContent = `⭐ ให้ ${step>0?"+"+step:step} แต้มเลย`;
+  $("#btnDrawOk").dataset.sid = s.id;
+  sndFanfare(); fxSparks(window.innerWidth/2, window.innerHeight/2, 40);
+}
+function revealGroups(){
+  pendingGroups = buildGroups();
+  if(!pendingGroups){ $("#drawOverlay").classList.remove("show"); toast("นักเรียนไม่พอสำหรับแบ่งกลุ่ม"); return; }
+  const cls = activeClass(), byId = new Map(cls.students.map(s => [s.id, s]));
+  $("#drawTitle").textContent = "✨ ผลการจัดกลุ่ม";
+  $("#roulette").classList.add("hide"); $("#drawRing").classList.add("hide");
+  $("#drawResult").innerHTML = pendingGroups.list.map((g,i) => `
+    <div class="gcard reveal" style="--gc:${g.color};animation-delay:${i*220}ms">
+      <div class="gcard-head"><div class="gi">${g.icon}</div>
+        <div class="gn">${esc(g.name)}<small>${g.members.length} คน</small></div></div>
+      <div class="gmembers">${g.members.map(id => { const s = byId.get(id);
+        return `<span class="mchip"><span class="ma">${s.avatar}</span><span class="mn">${esc(s.name)}</span></span>`; }).join("")}</div>
+    </div>`).join("");
+  $("#drawActions").classList.remove("hide");
+  $("#btnDrawOk").textContent = "เริ่มกิจกรรม";
+  delete $("#btnDrawOk").dataset.sid;
+  pendingGroups.list.forEach((_,i) => setTimeout(sndPop, i*220));
+  setTimeout(() => { sndFanfare(); fxSparks(window.innerWidth/2, window.innerHeight/3, 30); }, pendingGroups.list.length*220);
+}
+$("#btnDrawAgain").addEventListener("click", () => startDraw(drawKind));
+$("#btnDrawOk").addEventListener("click", e => {
+  const sid = e.currentTarget.dataset.sid;
+  $("#drawOverlay").classList.remove("show");
+  if(sid){ addPoints(sid, step, null); return; }
+  if(!pendingGroups) return;
+  const cls = activeClass();
+  cls.groups = pendingGroups; pendingGroups = null;
+  groupEdit = false; $("#btnGroupEdit").classList.remove("on");
+  setMode("group"); save(); renderGroups(true);
+  toast("เริ่มกิจกรรมกลุ่มได้เลย · คลิกการ์ดกลุ่มเพื่อให้แต้มทุกคน");
+});
+
+/* ══════════ ปุ่มโหมดกลุ่ม ══════════ */
+$("#btnGroup").addEventListener("click", () => {
+  $("#resumeBox").classList.toggle("hide", !activeClass().groups);
+  $("#mGroup").classList.add("show");
+});
+$("#btnResume").addEventListener("click", () => { $("#mGroup").classList.remove("show"); setMode("group"); });
+$("#gType").addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if(!b) return;
+  gType = b.dataset.t;
+  [...$("#gType").children].forEach(c => c.classList.toggle("on", c===b));
+  $("#gValWrap").classList.toggle("hide", gType === "pair");
+  $("#gValLabel").textContent = gType === "size" ? "กลุ่มละกี่คน" : "แบ่งเป็นกี่กลุ่ม";
+});
+$("#gMix").addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if(!b) return;
+  gMix = b.dataset.m; [...$("#gMix").children].forEach(c => c.classList.toggle("on", c===b));
+});
+$("#gTime").addEventListener("click", e => {
+  const b = e.target.closest(".opt"); if(!b) return;
+  gSecs = parseInt(b.dataset.s,10); [...$("#gTime").children].forEach(c => c.classList.toggle("on", c===b));
+});
+$("#btnGroupStart").addEventListener("click", () => startDraw("group"));
+$("#btnPickOne").addEventListener("click", () => startDraw("one"));
+$("#btnReroll").addEventListener("click", () => startDraw("group"));
+$("#btnEndGroup").addEventListener("click", () => {
+  const cls = activeClass();
+  const win = [...cls.groups.list].sort((a,b) => b.session-a.session)[0];
+  setMode("solo");
+  if(win && win.session > 0){
+    showBanner(`<span class="big">🏆</span><span>กลุ่มชนะคือ <b>${win.icon} ${esc(win.name)}</b> ด้วย <b>${win.session}</b> คริสตัล!</span>`);
+    sndFanfare();
+  }
+  toast("จบกิจกรรมกลุ่ม · แต้มถูกเก็บเข้ารายบุคคลเรียบร้อย");
+});
+$("#btnGroupEdit").addEventListener("click", e => {
+  if(heist.on) heistOff(true);
+  groupEdit = !groupEdit;
+  e.currentTarget.classList.toggle("on", groupEdit);
+  toast(groupEdit ? "แตะที่ชื่อนักเรียนเพื่อย้ายกลุ่ม" : "ปิดโหมดปรับกลุ่มแล้ว");
+  render();
+});
+$("#btnGroupAdd").addEventListener("click", () => {
+  const cls = activeClass();
+  const used = new Set(cls.groups.list.map(g => g.name));
+  const p = PARTY.find(x => !used.has("ปาร์ตี้"+x.n)) || PARTY[0];
+  cls.groups.list.push({id:uid(), name:"ปาร์ตี้"+p.n, icon:p.i, color:p.c, members:[], session:0});
+  if(!groupEdit){ groupEdit = true; $("#btnGroupEdit").classList.add("on"); }
+  render(); save(); toast("เพิ่มกลุ่มว่างแล้ว แตะชื่อนักเรียนเพื่อย้ายเข้ามา");
+});
+
+/* ══════════ คลิกการ์ด ══════════ */
+$("#grid").addEventListener("click", e => {
+  const card = e.target.closest(".card"); if(!card) return;
+  const id = card.dataset.id;
+  if(heist.on){ heistPick(id); return; }
+  const btn = e.target.closest("[data-act]");
+  if(btn){ e.stopPropagation(); btn.dataset.act === "sub" ? addPoints(id,-1,e) : openEdit(id); return; }
+  addPoints(id, step, e);
+});
+$("#grid").addEventListener("contextmenu", e => {
+  const card = e.target.closest(".card"); if(!card || heist.on) return;
+  e.preventDefault(); addPoints(card.dataset.id, -1, e);
+});
+$("#grid").addEventListener("keydown", e => {
+  const card = e.target.closest(".card"); if(!card) return;
+  if(e.key === "Enter" || e.key === " "){
+    e.preventDefault();
+    heist.on ? heistPick(card.dataset.id) : addPoints(card.dataset.id, step, null);
+  }
+});
+$("#ggrid").addEventListener("click", e => {
+  const card = e.target.closest(".gcard"); if(!card) return;
+  const gid = card.dataset.gid;
+  if(heist.on){ if(gid !== "__pool") heistPick(gid); return; }
+  const chip = e.target.closest(".mchip");
+  if(groupEdit && chip){ e.stopPropagation(); openMove(chip.dataset.sid); return; }
+  const gb = e.target.closest("[data-gact]");
+  if(gb){
+    e.stopPropagation();
+    const cls = activeClass(), g = cls.groups.list.find(x => x.id === gid);
+    if(gb.dataset.gact === "rename"){
+      const nm = prompt("ชื่อกลุ่มใหม่", g.name);
+      if(nm && nm.trim()){ g.name = nm.trim(); render(); save(); }
+    }else{
+      if(g.members.length > 0 && !confirm(`ลบ "${g.name}"? สมาชิก ${g.members.length} คนจะกลับไปอยู่ช่อง "ยังไม่มีกลุ่ม"`)) return;
+      cls.groups.list = cls.groups.list.filter(x => x.id !== gid);
+      render(); save(); toast("ลบกลุ่มแล้ว");
+    }
+    return;
+  }
+  if(gid === "__pool" || groupEdit) return;
+  addGroupPoints(gid, step, e);
+});
+$("#ggrid").addEventListener("keydown", e => {
+  const card = e.target.closest(".gcard"); if(!card) return;
+  const gid = card.dataset.gid;
+  if((e.key === "Enter" || e.key === " ") && gid !== "__pool"){
+    e.preventDefault();
+    if(heist.on) heistPick(gid); else if(!groupEdit) addGroupPoints(gid, step, null);
+  }
+});
+function openMove(sid){
+  const cls = activeClass(), st = cls.students.find(s => s.id === sid); if(!st) return;
+  movingId = sid;
+  $("#moveTitle").textContent = `ย้าย ${st.avatar} ${st.name} ไปกลุ่มไหน`;
+  $("#moveList").innerHTML = cls.groups.list.map(g =>
+    `<button class="moveitem" data-gid="${g.id}"><span class="mi">${g.icon}</span><span>${esc(g.name)}</span>
+      <span class="mc">${g.members.length} คน</span></button>`).join("")
+    + `<button class="moveitem" data-gid="__pool"><span class="mi">🕰️</span><span>เอาออกจากกลุ่ม</span></button>`;
+  $("#mMove").classList.add("show");
+}
+$("#moveList").addEventListener("click", e => {
+  const b = e.target.closest(".moveitem"); if(!b) return;
+  const cls = activeClass(), target = b.dataset.gid;
+  cls.groups.list.forEach(g => g.members = g.members.filter(id => id !== movingId));
+  if(target !== "__pool"){ const g = cls.groups.list.find(x => x.id === target); if(g) g.members.push(movingId); }
+  $("#mMove").classList.remove("show"); sndPop(); render(); save();
+});
+
+/* ══════════ หอกิลด์ ══════════ */
+$("#lobbyGrid").addEventListener("click", e => {
+  if(e.target.closest("#btnNewRoom")){ openRoomModal("new"); return; }
+  const card = e.target.closest(".room-card"); if(!card) return;
+  const id = card.dataset.id, b = e.target.closest("[data-ract]");
+  if(b){
+    e.stopPropagation();
+    if(b.dataset.ract === "enter") goRoom(id);
+    else if(b.dataset.ract === "edit") openRoomModal("edit", id);
+    else deleteRoom(id);
+    return;
+  }
+  goRoom(id);
+});
+$("#lobbyGrid").addEventListener("keydown", e => {
+  const card = e.target.closest(".room-card"); if(!card) return;
+  if(e.key === "Enter" || e.key === " "){ e.preventDefault(); goRoom(card.dataset.id); }
+});
+function deleteRoom(id){
+  const c = DB.classes.find(x => x.id === id); if(!c) return;
+  if(!confirm(`ลบห้อง "${c.name}" ทั้งห้อง?\nรายชื่อ ${c.students.length} คนและแต้มทั้งหมดจะหายไปถาวร`)) return;
+  DB.classes = DB.classes.filter(x => x.id !== id);
+  if(DB.activeId === id) DB.activeId = DB.classes[0] ? DB.classes[0].id : null;
+  render(); save(); toast(`ลบห้อง ${c.name} แล้ว`);
+}
+
+/* ══════════ โมดัลห้องเรียน ══════════ */
+function renderIconPick(sel){
+  $("#roomIconPick").innerHTML = ROOM_ICONS.map(i => `<button type="button" data-i="${i}" class="${i===sel?"on":""}">${i}</button>`).join("");
+}
+$("#roomIconPick").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  roomIcon = b.dataset.i; [...$("#roomIconPick").children].forEach(c => c.classList.toggle("on", c===b));
+});
+function openRoomModal(m, id){
+  roomMode = m; roomEditId = id || null;
+  if(m === "new"){
+    roomIcon = ROOM_ICONS[DB.classes.length % ROOM_ICONS.length];
+    $("#roomTitle").textContent = "สร้างห้องเรียนใหม่";
+    $("#roomSub").textContent = "ตั้งชื่อห้อง เลือกตราประจำห้อง แล้วใส่รายชื่อนักเรียนได้เลย";
+    $("#roomName").value = ""; $("#roomStudents").value = "";
+    $("#roomStudentsWrap").classList.remove("hide");
+  }else{
+    const c = DB.classes.find(x => x.id === id); if(!c) return;
+    roomIcon = c.icon || "🏰";
+    $("#roomTitle").textContent = "แก้ไขห้องเรียน";
+    $("#roomSub").textContent = "เปลี่ยนชื่อห้องหรือตราประจำห้อง";
+    $("#roomName").value = c.name;
+    $("#roomStudentsWrap").classList.add("hide");
+  }
+  renderIconPick(roomIcon);
+  $("#mRoom").classList.add("show");
+  setTimeout(() => $("#roomName").focus(), 100);
+}
+$("#btnRoomNums").addEventListener("click", () => {
+  const n = Math.min(60, Math.max(1, parseInt($("#roomNumCount").value,10) || 30));
+  $("#roomStudents").value = Array.from({length:n},(_,i)=>`เลขที่ ${i+1}`).join("\n");
+});
+$("#btnRoomSave").addEventListener("click", () => {
+  const nm = $("#roomName").value.trim();
+  if(!nm){ toast("ตั้งชื่อห้องก่อนนะครับ"); return; }
+  if(roomMode === "edit"){
+    const c = DB.classes.find(x => x.id === roomEditId); if(!c) return;
+    c.name = nm; c.icon = roomIcon;
+    $("#mRoom").classList.remove("show");
+    if(view === "room"){ $("#brandName").textContent = nm; $("#brandIcon").textContent = roomIcon; }
+    render(); save(); toast("บันทึกห้องเรียนแล้ว");
+  }else{
+    const names = $("#roomStudents").value.split("\n").map(s => s.trim()).filter(Boolean);
+    const c = {id:uid(), name:nm, icon:roomIcon,
+      students: names.map(n => ({id:uid(), name:n, points:0, avatar:AVATARS[Math.floor(Math.random()*AVATARS.length)]}))};
+    DB.classes.push(c);
+    $("#mRoom").classList.remove("show");
+    save(); toast(`สร้างห้อง ${nm} แล้ว (${names.length} คน)`);
+    goRoom(c.id);
+  }
+});
+$("#roomName").addEventListener("keydown", e => { if(e.key === "Enter") $("#btnRoomSave").click(); });
+
+/* ══════════ แถบเครื่องมือ ══════════ */
+document.querySelectorAll("[data-stepset]").forEach(set => {
+  set.addEventListener("click", e => {
+    const b = e.target.closest(".chip"); if(!b) return;
+    step = parseInt(b.dataset.step,10);
+    document.querySelectorAll("[data-stepset]").forEach(s2 =>
+      [...s2.children].forEach(c => c.classList.toggle("on", parseInt(c.dataset.step,10) === step)));
+  });
+});
+$("#search").addEventListener("input", e => { query = e.target.value.trim().toLowerCase(); clearFreeze(); renderGrid(); });
+$("#sortSel").addEventListener("change", e => { sortBy = e.target.value; clearFreeze(); renderGrid(); });
+$("#btnUndo").addEventListener("click", undo);
+$("#btnUndo2").addEventListener("click", undo);
+$("#btnBig").addEventListener("click", () => $("#grid").classList.toggle("big"));
+$("#btnFull").addEventListener("click", () => {
+  document.fullscreenElement ? document.exitFullscreen()
+    : document.documentElement.requestFullscreen().catch(() => toast("เบราว์เซอร์ไม่อนุญาตให้เต็มจอ"));
+});
+$("#btnSound").addEventListener("click", e => {
+  DB.settings.sound = !DB.settings.sound;
+  e.currentTarget.textContent = DB.settings.sound ? "🔊" : "🔇";
+  e.currentTarget.classList.toggle("off", !DB.settings.sound);
+  if(DB.settings.sound) sndPlus();
+  save();
+});
+/* ══════════ ประตูแอดมิน (ครูเท่านั้น) ══════════ */
+function openAdmin(){
+  $("#gatePass").value = ""; $("#gateErr").textContent = "";
+  $("#mAdmin").classList.add("show");
+  setTimeout(() => $("#gatePass").focus(), 100);
+}
+$("#btnAdminOpen").addEventListener("click", openAdmin);
+$("#btnGateLogin").addEventListener("click", async () => {
+  if(!sb){ $("#gateErr").textContent = "ยังไม่ได้ตั้งค่า Supabase ในไฟล์นี้"; return; }
+  const pass = $("#gatePass").value;
+  if(!pass){ $("#gateErr").textContent = "กรอกรหัสผ่าน"; return; }
+  $("#gateErr").textContent = "กำลังตรวจสอบ...";
+  const { data, error } = await sb.auth.signInWithPassword({ email: ADMIN_EMAIL, password: pass });
+  if(error){ $("#gateErr").textContent = "รหัสผ่านไม่ถูกต้อง"; return; }
+  syncUser = data.user; $("#gateErr").textContent = "";
+  await afterLogin();
+});
+$("#gatePass").addEventListener("keydown", e => { if(e.key === "Enter") $("#btnGateLogin").click(); });
+$("#btnSync").addEventListener("click", () => {
+  if(!sb || !syncUser) return;
+  const t = $("#synctip") || (() => { const d = document.createElement("div"); d.id="synctip"; d.className="synctip"; document.body.appendChild(d); return d; })();
+  const msg = {ok:"☁️ ซิงก์ล่าสุดสำเร็จ", pending:"☁️ กำลังซิงก์...", off:"ยังไม่ได้เข้าสู่ระบบ", err:"⚠️ ซิงก์ล้มเหลว กำลังลองใหม่"}[syncStatus];
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(t._tt); t._tt = setTimeout(() => t.classList.remove("show"), 2000);
+  pushCloud();
+});
+$("#btnLogout").addEventListener("click", async () => {
+  if(!confirm("ออกจากระบบหลังบ้าน? จะกลับไปเป็นหน้าจอนักเรียนทันที")) return;
+  if(sb) await sb.auth.signOut();
+  syncUser = null; setSyncStatus("off"); $("#mSet").classList.remove("show");
+  enterStudentMode();
+  await bootStudentMode();
+  toast("ออกจากระบบหลังบ้านแล้ว");
+});
+
+document.addEventListener("keydown", e => {
+  if((e.ctrlKey||e.metaKey) && e.key.toLowerCase() === "z" && !/input|textarea/i.test(e.target.tagName)){ e.preventDefault(); undo(); }
+  if(e.key === "Escape"){
+    document.querySelectorAll(".mask.show").forEach(m => m.classList.remove("show"));
+    if($("#drawOverlay").classList.contains("show")){
+      clearInterval(rollTimer); clearInterval(countTimer);
+      $("#drawOverlay").classList.remove("show","heistbg");
+      $("#vsBox").classList.add("hide"); $("#heistPick").classList.add("hide");
+      pendingGroups = null; heistPair = null; heistGuess = new Set();
+      heist.thief = null; updateHeistStep(); render();
+    }else if(heist.on) heistOff(false);
+  }
+});
+document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => b.closest(".mask").classList.remove("show")));
+document.querySelectorAll(".mask").forEach(m => m.addEventListener("click", e => { if(e.target === m) m.classList.remove("show"); }));
+
+/* ══════════ เพิ่ม/แก้ไขนักเรียน ══════════ */
+$("#btnAdd").addEventListener("click", () => { $("#addNames").value=""; $("#mAdd").classList.add("show"); setTimeout(()=>$("#addNames").focus(),100); });
+$("#btnMakeNums").addEventListener("click", () => {
+  const n = Math.min(60, Math.max(1, parseInt($("#numCount").value,10) || 30));
+  $("#addNames").value = Array.from({length:n},(_,i)=>`เลขที่ ${i+1}`).join("\n");
+});
+$("#btnAddSave").addEventListener("click", () => {
+  const cls = activeClass(); if(!cls) return;
+  const names = $("#addNames").value.split("\n").map(s => s.trim()).filter(Boolean);
+  if(names.length === 0){ toast("ยังไม่ได้พิมพ์ชื่อ"); return; }
+  names.forEach(name => cls.students.push({id:uid(), name, points:0, avatar:AVATARS[Math.floor(Math.random()*AVATARS.length)]}));
+  $("#mAdd").classList.remove("show"); render(); save(); toast(`เพิ่มนักเรียน ${names.length} คนแล้ว`);
+});
+function openEdit(id){
+  const st = activeClass().students.find(s => s.id === id); if(!st) return;
+  editId = id; editAva = st.avatar;
+  $("#edName").value = st.name; $("#edPoints").value = st.points;
+  $("#avaPick").innerHTML = AVATARS.map(a => `<button type="button" data-a="${a}" class="${a===st.avatar?"on":""}">${a}</button>`).join("");
+  $("#mEdit").classList.add("show");
+}
+$("#avaPick").addEventListener("click", e => {
+  const b = e.target.closest("button"); if(!b) return;
+  editAva = b.dataset.a; [...$("#avaPick").children].forEach(c => c.classList.toggle("on", c===b));
+});
+$("#btnEditSave").addEventListener("click", () => {
+  const st = activeClass().students.find(s => s.id === editId); if(!st) return;
+  const nm = $("#edName").value.trim();
+  if(!nm){ toast("ชื่อห้ามว่าง"); return; }
+  st.name = nm; st.points = Math.max(0, parseInt($("#edPoints").value,10) || 0); st.avatar = editAva;
+  $("#mEdit").classList.remove("show"); render(); save(); toast("บันทึกแล้ว");
+});
+$("#btnDel").addEventListener("click", () => {
+  const cls = activeClass(), st = cls.students.find(s => s.id === editId); if(!st) return;
+  if(!confirm(`ลบ "${st.name}" ออกจากห้อง? แต้มทั้งหมดจะหายไปด้วย`)) return;
+  cls.students = cls.students.filter(s => s.id !== editId);
+  if(cls.groups) cls.groups.list.forEach(g => g.members = g.members.filter(id => id !== editId));
+  $("#mEdit").classList.remove("show"); render(); save(); toast("ลบนักเรียนแล้ว");
+});
+
+/* ══════════ ตั้งค่าและข้อมูล ══════════ */
+$("#btnSettings").addEventListener("click", () => { $("#perLevel").value = DB.settings.perLevel; $("#mSet").classList.add("show"); });
+$("#perLevel").addEventListener("change", e => { DB.settings.perLevel = parseInt(e.target.value,10); render(); save(); });
+function download(name, text, type){
+  const url = URL.createObjectURL(new Blob([text],{type}));
+  const a = document.createElement("a"); a.href = url; a.download = name; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1500);
+}
+$("#btnExport").addEventListener("click", () => {
+  download(`กิลด์ผู้กล้า-สำรอง-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(DB,null,2), "application/json");
+  toast("ดาวน์โหลดไฟล์สำรองแล้ว");
+});
+$("#btnCsv").addEventListener("click", () => {
+  const cls = activeClass();
+  if(!cls){ toast("เข้าห้องเรียนก่อนจึงจะออก CSV ได้"); return; }
+  const gname = new Map();
+  if(cls.groups) cls.groups.list.forEach(g => g.members.forEach(id => gname.set(id, g.name)));
+  const rows = [["ชื่อ","คริสตัล","ระดับ","ยศ","กลุ่มล่าสุด"]].concat(
+    [...cls.students].sort((a,b) => b.points-a.points).map(s => {
+      const L = levelOf(s.points); return [s.name, s.points, L.lv, L.rank.name, gname.get(s.id) || "-"]; }));
+  const csv = "\uFEFF" + rows.map(r => r.map(v => `"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n");
+  download(`คะแนน-${cls.name}.csv`, csv, "text/csv");
+  toast("ออกไฟล์ CSV แล้ว เปิดใน Excel ได้เลย");
+});
+$("#btnImport").addEventListener("click", () => $("#fileIn").click());
+$("#fileIn").addEventListener("change", e => {
+  const f = e.target.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = () => {
+    try{
+      const d = JSON.parse(r.result);
+      if(!d.classes || !Array.isArray(d.classes)) throw 0;
+      if(!confirm("กู้คืนข้อมูลจากไฟล์นี้? ข้อมูลปัจจุบันจะถูกแทนที่ทั้งหมด")) return;
+      DB = d;
+      DB.settings = Object.assign({sound:true, perLevel:10}, DB.settings || {});
+      DB.classes.forEach((c,i) => { if(!c.icon) c.icon = ROOM_ICONS[i % ROOM_ICONS.length]; });
+      undoStack = []; heistLog = []; $("#mSet").classList.remove("show");
+      save(); goLobby(); toast("กู้คืนข้อมูลสำเร็จ");
+    }catch(err){ toast("ไฟล์นี้ไม่ใช่ไฟล์สำรองของกิลด์ผู้กล้า"); }
+  };
+  r.readAsText(f); e.target.value = "";
+});
+$("#btnReset").addEventListener("click", () => {
+  const cls = activeClass();
+  if(!cls){ toast("เข้าห้องเรียนก่อนจึงจะล้างแต้มได้"); return; }
+  if(!confirm(`ล้างแต้มของทุกคนในห้อง "${cls.name}" ให้เป็น 0? รายชื่อยังอยู่ครบ`)) return;
+  cls.students.forEach(s => s.points = 0);
+  if(cls.groups) cls.groups.list.forEach(g => g.session = 0);
+  undoStack = []; heistLog = []; render(); save(); toast("ล้างแต้มเรียบร้อย เริ่มเทอมใหม่ได้เลย");
+});
+
+/* ══════════ เริ่มทำงาน ══════════ */
+(async function init(){
+  const loaded = await Store.load();
+  if(loaded && loaded.classes && loaded.classes.length){
+    DB = loaded;
+    DB.settings = Object.assign({sound:true, perLevel:10}, DB.settings || {});
+    DB.classes.forEach((c,i) => { if(!c.icon) c.icon = ROOM_ICONS[i % ROOM_ICONS.length]; });
+  }else{
+    DB.classes = [{id:uid(), name:"ห้องตัวอย่าง ป.5/1", icon:"🐉", students:[
+      {id:uid(), name:"ด.ช. สมชาย ใจดี",   points:12, avatar:"🦊"},
+      {id:uid(), name:"ด.ญ. สมหญิง ตั้งใจ", points:27, avatar:"🦄"},
+      {id:uid(), name:"ด.ช. อนุชา รักเรียน", points:5,  avatar:"🐲"},
+      {id:uid(), name:"ด.ญ. ปิยะดา ขยัน",   points:19, avatar:"🦉"},
+      {id:uid(), name:"ด.ช. ธนกฤต กล้าหาญ", points:9,  avatar:"🐺"},
+      {id:uid(), name:"ด.ญ. ชนิดา ยิ้มแย้ม", points:16, avatar:"🦋"}
+    ]}];
+  }
+  DB.activeId = null;
+  $("#btnSound").textContent = DB.settings.sound ? "🔊" : "🔇";
+  $("#btnSound").classList.toggle("off", !DB.settings.sound);
+
+  if(!sb){
+    // ยังไม่ได้ตั้งค่า Supabase — ใช้งานแบบเดิมทั้งหมด (เครื่องเดียว ไม่มีแยกบทบาท)
+    enterTeacherMode(); goLobby(); return;
+  }
+  const hasSession = await initCloudSync();
+  if(hasSession){ enterTeacherMode(); await afterLogin(); return; }
+  enterStudentMode();
+  await bootStudentMode();
+})();
+</script>
+</body>
+</html>
