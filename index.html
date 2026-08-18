@@ -620,7 +620,7 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
       <aside class="side">
         <div class="panel">
           <h2 id="boardTitle">🏆 แท่นเกียรติยศ
-            <button class="btn-podium-preview" id="btnPodiumPreview" title="ดูโพเดียมแบบที่นักเรียนเห็น">🏅 พรีวิว</button>
+            <button class="btn-podium-preview" id="btnPodiumPreview" title="ดูโพเดียม/อันดับแบบพรีวิว">🏅 พรีวิว</button>
           </h2>
           <div id="board"></div>
         </div>
@@ -732,6 +732,14 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
       <button class="btn ghost" data-close>ยกเลิก</button>
       <button class="btn gold" id="btnGroupStart">เริ่มสุ่ม</button>
     </div>
+    <div style="border-top:1px solid var(--line);margin-top:18px;padding-top:16px">
+      <label style="margin-top:0">🖐️ หรือจัดกลุ่มเอง (ไม่สุ่ม)</label>
+      <div class="row">
+        <input id="manualGroupCount" class="field" type="number" min="1" max="20" value="4">
+        <button class="btn" id="btnManualGroups" style="flex:none">สร้างกลุ่มว่าง</button>
+      </div>
+      <p class="hint">สร้างกลุ่มว่างตามจำนวนที่ใส่ ตั้งชื่อสุ่มให้ก่อน (ไปเปลี่ยนชื่อทีหลังได้) นักเรียนทุกคนไปกองที่ "ยังไม่มีกลุ่ม" แตะเพื่อย้ายเข้ากลุ่มเองได้ทันที</p>
+    </div>
   </div>
 </div>
 
@@ -772,10 +780,10 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
 <div class="preview-overlay" id="previewOverlay">
   <div class="preview-box">
     <div class="preview-head">
-      <b>🏅 พรีวิวสิ่งที่นักเรียนเห็น</b>
+      <b id="previewHeadTitle">🏅 พรีวิวสิ่งที่นักเรียนเห็น</b>
       <button class="preview-close" id="btnPreviewClose">✕</button>
     </div>
-    <div class="preview-tag">แสดงตัวอย่างเท่านั้น แก้ไขอะไรไม่ได้จากหน้านี้</div>
+    <div class="preview-tag" id="previewHeadTag">แสดงตัวอย่างเท่านั้น แก้ไขอะไรไม่ได้จากหน้านี้</div>
     <div class="podium-stage" id="previewPodiumStage"></div>
     <div class="podium-base hide" id="previewPodiumBase"></div>
     <h3 class="rank-heading" id="previewRankHeading">📜 อันดับทั้งหมดในห้อง</h3>
@@ -934,6 +942,7 @@ function normalizeDB(db){
   db.classes.forEach((c,i) => {
     if(!c.icon) c.icon = ROOM_ICONS[i % ROOM_ICONS.length];
     if(typeof c.sessionActive !== "boolean") c.sessionActive = true;
+    if(typeof c.groupModeActive !== "boolean") c.groupModeActive = false;
     c.students.forEach(s => { if(typeof s.sessionPts !== "number") s.sessionPts = 0; });
   });
   return db;
@@ -1154,11 +1163,59 @@ function studentRenderBoard(){
   const total = c.students.reduce((a,s) => a+s.points, 0);
   $("#stuMeTag").innerHTML = `👥 ${c.students.length} คน · 💎 รวม ${total} คริสตัล`;
 }
+/* เรนเดอร์โพเดียมของ "กลุ่ม" (โหมดกิจกรรมกลุ่ม) — เรียงตามคะแนนกิจกรรม g.session */
+function renderGroupPodiumInto(groups, ids){
+  const stage = $(ids.stage), base = $(ids.base), heading = $(ids.heading), grid = $(ids.grid);
+  const ranked = [...groups].sort((a,b) => b.session-a.session || a.name.localeCompare(b.name,"th"));
+  if(ranked.length === 0){
+    stage.innerHTML = ""; base.classList.add("hide"); heading.classList.add("hide");
+    grid.innerHTML = `<div class="empty"><span class="ico">👫</span><h3>ยังไม่มีกลุ่ม</h3><p>สุ่มหรือจัดกลุ่มเองก่อนนะ</p></div>`;
+    return ranked;
+  }
+  heading.classList.remove("hide"); heading.textContent = "📜 คะแนนทุกกลุ่มในกิจกรรมนี้";
+  const top = ranked.slice(0,3);
+  const order = top.length >= 3 ? [1,0,2] : (top.length === 2 ? [1,0] : [0]);
+  const CROWN = ["👑","⚔️","🛡️"];
+  const RNAME = ["ปาร์ตี้จ้าวคริสตัล","ปาร์ตี้รองบัลลังก์","ปาร์ตี้อันดับสาม"];
+  stage.innerHTML = order.map((idx,seq) => {
+    const g = top[idx]; if(!g) return "";
+    return `<div class="pod p${idx+1}" style="animation-delay:${seq*160}ms">
+      <div class="crown">${CROWN[idx]}</div>
+      <div class="hero">${g.icon}</div>
+      <div class="pillar">
+        <div class="medal-badge">${idx+1}</div>
+        <div class="prankname">${RNAME[idx]}</div>
+      </div>
+      <div class="pname">${esc(g.name)}</div>
+      <div class="pscore">${g.session}</div>
+      <div class="prank">👥 ${g.members.length} คน</div>
+    </div>`;
+  }).join("");
+  base.classList.remove("hide");
+  grid.innerHTML = ranked.map((g,i) => `
+    <div class="gcard" style="--gc:${g.color};cursor:default">
+      <div class="gcard-head"><div class="gi">${g.icon}</div>
+        <div class="gn">${esc(g.name)}<small>${g.members.length} คน</small></div>
+        <div class="gs">${g.session}</div></div>
+      <div class="gmembers"><span style="font-size:12px;color:#C3B6EE">🏅 อันดับ #${i+1}</span></div>
+    </div>`).join("");
+  return ranked;
+}
 /* พรีวิวโพเดียมลอย เรียกจากหน้าให้แต้ม (โหมดแอดมิน) — ดูอย่างเดียว ไม่เปลี่ยนหน้าจอหลัก */
 const PODIUM_IDS_PREVIEW = {stage:"#previewPodiumStage", base:"#previewPodiumBase", heading:"#previewRankHeading", grid:"#previewGrid"};
 function openPodiumPreview(){
   const cls = activeClass(); if(!cls) return;
-  renderPodiumInto(cls.students, PODIUM_IDS_PREVIEW);
+  if(mode === "group" && cls.groups){
+    $("#previewGrid").className = "ggrid";
+    $("#previewHeadTitle").textContent = "🏅 พรีวิวอันดับกลุ่ม";
+    $("#previewHeadTag").textContent = "สรุปคะแนนกิจกรรมกลุ่มทั้งหมด ใช้ดูภาพรวมเท่านั้น (หน้านี้นักเรียนไม่เห็น)";
+    renderGroupPodiumInto(cls.groups.list, PODIUM_IDS_PREVIEW);
+  }else{
+    $("#previewGrid").className = "grid";
+    $("#previewHeadTitle").textContent = "🏅 พรีวิวสิ่งที่นักเรียนเห็น";
+    $("#previewHeadTag").textContent = "แสดงตัวอย่างเท่านั้น แก้ไขอะไรไม่ได้จากหน้านี้";
+    renderPodiumInto(cls.students, PODIUM_IDS_PREVIEW);
+  }
   $("#previewOverlay").classList.add("show");
 }
 $("#btnPodiumPreview").addEventListener("click", openPodiumPreview);
@@ -1346,14 +1403,15 @@ function goLobby(){
 function goRoom(id){
   const c = DB.classes.find(x => x.id === id);
   if(!c){ goLobby(); return; }
-  DB.activeId = id; view = "room"; mode = "solo"; groupEdit = false; query = ""; $("#search").value = "";
+  DB.activeId = id; view = "room"; groupEdit = false; query = ""; $("#search").value = "";
   heistOff(true); clearFreeze(); heistLog = [];
   $("#viewLobby").classList.add("hide"); $("#viewRoom").classList.remove("hide");
   ["#btnBack","#classSel","#btnBig","#btnFull"].forEach(s => $(s).classList.remove("hide"));
   $("#brandIcon").textContent = c.icon || "🏰";
   $("#brandName").textContent = c.name;
-  $("#brandSub").textContent = "กระดานสะสมคริสตัลประจำห้อง";
-  save(); render(); window.scrollTo({top:0,behavior:"smooth"});
+  save();
+  setMode(c.groupModeActive && c.groups ? "group" : "solo");
+  window.scrollTo({top:0,behavior:"smooth"});
 }
 $("#btnBack").addEventListener("click", goLobby);
 $("#classSel").addEventListener("change", e => goRoom(e.target.value));
@@ -1386,7 +1444,7 @@ function renderLobby(){
     const champ = [...c.students].sort((a,b) => b.points-a.points)[0];
     return `<div class="room-card" data-id="${c.id}" tabindex="0" role="button">
       <div class="room-icon">${c.icon||"🏰"}</div><h3>${esc(c.name)}</h3>
-      <div class="room-meta">👥 ${c.students.length} คน · 💎 ${total} คริสตัล${c.groups?" · 👫 มีกลุ่มค้างไว้":""}</div>
+      <div class="room-meta">👥 ${c.students.length} คน · 💎 ${total} คริสตัล${c.groupModeActive?" · 🟢 กำลังทำกิจกรรมกลุ่ม":(c.groups?" · 👫 มีกลุ่มเก็บไว้":"")}</div>
       <div class="room-champ">${champ ? `🏆 ${champ.avatar} ${esc(champ.name)} <b style="margin-left:auto">${champ.points}</b>` : "ยังไม่มีนักเรียนในห้องนี้"}</div>
       <div class="room-actions">
         <button class="btn gold grow" data-ract="enter">เข้าห้อง</button>
@@ -1915,6 +1973,7 @@ $("#btnDrawOk").addEventListener("click", e => {
   if(!pendingGroups) return;
   const cls = activeClass();
   cls.groups = pendingGroups; pendingGroups = null;
+  cls.groupModeActive = true;
   groupEdit = false; $("#btnGroupEdit").classList.remove("on");
   setMode("group"); save(); renderGroups(true);
   toast("เริ่มกิจกรรมกลุ่มได้เลย · คลิกการ์ดกลุ่มเพื่อให้แต้มทุกคน");
@@ -1925,7 +1984,10 @@ $("#btnGroup").addEventListener("click", () => {
   $("#resumeBox").classList.toggle("hide", !activeClass().groups);
   $("#mGroup").classList.add("show");
 });
-$("#btnResume").addEventListener("click", () => { $("#mGroup").classList.remove("show"); setMode("group"); });
+$("#btnResume").addEventListener("click", () => {
+  const cls = activeClass(); if(cls) cls.groupModeActive = true;
+  $("#mGroup").classList.remove("show"); setMode("group"); save();
+});
 $("#gType").addEventListener("click", e => {
   const b = e.target.closest(".opt"); if(!b) return;
   gType = b.dataset.t;
@@ -1942,12 +2004,33 @@ $("#gTime").addEventListener("click", e => {
   gSecs = parseInt(b.dataset.s,10); [...$("#gTime").children].forEach(c => c.classList.toggle("on", c===b));
 });
 $("#btnGroupStart").addEventListener("click", () => startDraw("group"));
+$("#btnManualGroups").addEventListener("click", () => {
+  const cls = activeClass();
+  if(!cls || cls.students.length === 0){ toast("ห้องนี้ยังไม่มีนักเรียน"); return; }
+  const n = Math.min(20, Math.max(1, parseInt($("#manualGroupCount").value,10) || 4));
+  const names = shuffle(PARTY);
+  cls.groups = {
+    createdAt: Date.now(), type:"manual", mix:"manual",
+    list: Array.from({length:n}, (_,i) => ({
+      id:uid(), name:"ปาร์ตี้"+names[i%names.length].n, icon:names[i%names.length].i,
+      color:names[i%names.length].c, members:[], session:0
+    }))
+  };
+  cls.groupModeActive = true;
+  groupEdit = true;
+  $("#mGroup").classList.remove("show");
+  setMode("group");
+  $("#btnGroupEdit").classList.add("on");
+  save();
+  toast(`สร้าง ${n} กลุ่มว่างแล้ว แตะชื่อนักเรียนเพื่อย้ายเข้ากลุ่ม`);
+});
 $("#btnPickOne").addEventListener("click", () => startDraw("one"));
 $("#btnReroll").addEventListener("click", () => startDraw("group"));
 $("#btnEndGroup").addEventListener("click", () => {
   const cls = activeClass();
   const win = [...cls.groups.list].sort((a,b) => b.session-a.session)[0];
-  setMode("solo");
+  cls.groupModeActive = false;
+  setMode("solo"); save();
   if(win && win.session > 0){
     showBanner(`<span class="big">🏆</span><span>กลุ่มชนะคือ <b>${win.icon} ${esc(win.name)}</b> ด้วย <b>${win.session}</b> คริสตัล!</span>`);
     sndFanfare();
