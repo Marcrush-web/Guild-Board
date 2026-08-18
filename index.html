@@ -209,6 +209,10 @@ button:focus-visible,.card:focus-visible,.chip:focus-visible,.room-card:focus-vi
 .mchip .ma{font-size:15px}
 .mchip .mn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:110px}
 .gcard.editing .mchip{cursor:pointer;border-color:rgba(232,179,60,.5);background:rgba(232,179,60,.14)}
+.gcard.editing{cursor:pointer}
+.gcard.picking{box-shadow:0 0 0 3px var(--gold-lite),0 0 30px 4px rgba(232,179,60,.6)!important;transform:translateY(-4px)}
+.gcard.picking .gcard-head{background:linear-gradient(90deg,rgba(232,179,60,.35),transparent)}
+.gcard.editing .mchip:hover{transform:scale(1.05)}
 .gcard.editing .mchip:hover{background:rgba(232,179,60,.3)}
 .gcard-foot{display:flex;gap:6px;padding:0 13px 12px}
 .gmini{border:0;cursor:pointer;padding:5px 11px;border-radius:9px;font-size:12px;font-weight:600;background:rgba(255,255,255,.08);color:#CFC3F5;transition:.15s}
@@ -920,7 +924,7 @@ try{
 let syncUser = null, syncStatus = "off", syncTimer = null, syncing = false, remoteUpdatedAt = null;
 
 let DB = {classes:[], activeId:null, settings:{sound:true, perLevel:10}};
-let view = "lobby", mode = "solo", groupEdit = false;
+let view = "lobby", mode = "solo", groupEdit = false, pickTarget = null;
 let step = 1, sortBy = "score", query = "";
 let editId = null, editAva = "", movingId = null;
 let roomMode = "new", roomEditId = null, roomIcon = "🏰";
@@ -1392,7 +1396,7 @@ function showPrompt(msg, defVal=""){
 
 /* ══════════ สลับหน้าจอ ══════════ */
 function goLobby(){
-  view = "lobby"; mode = "solo"; groupEdit = false; query = ""; $("#search").value = "";
+  view = "lobby"; mode = "solo"; groupEdit = false; pickTarget = null; query = ""; $("#search").value = "";
   heistOff(true); clearFreeze();
   $("#viewLobby").classList.remove("hide"); $("#viewRoom").classList.add("hide");
   ["#btnBack","#classSel","#btnBig","#btnFull"].forEach(s => $(s).classList.add("hide"));
@@ -1418,7 +1422,7 @@ $("#classSel").addEventListener("change", e => goRoom(e.target.value));
 
 function setMode(m){
   mode = m; const g = m === "group";
-  heistOff(true); clearFreeze();
+  heistOff(true); clearFreeze(); pickTarget = null;
   $("#toolSolo").classList.toggle("hide", g);
   $("#toolGroup").classList.toggle("hide", !g);
   $("#grid").classList.toggle("hide", g);
@@ -1531,15 +1535,18 @@ function renderGroups(reveal){
   const byId = new Map(cls.students.map(s => [s.id, s]));
   const assigned = new Set(cls.groups.list.flatMap(g => g.members));
   const pool = cls.students.filter(s => !assigned.has(s.id));
+  const quota = cls.groups.list.length ? Math.ceil(cls.students.length / cls.groups.list.length) : 0;
   const cards = cls.groups.list.map((g,i) => {
     const ms = g.members.map(id => byId.get(id)).filter(Boolean);
     const isThief = heist.on && heist.thief === g.id;
     const isSafe = heist.on && !isThief && guard.has(g.id);
-    return `<div class="gcard${groupEdit?" editing":""}${reveal?" reveal":""}${isThief?" thiefsel":""}${isSafe?" safe":""}"
+    const isPicking = groupEdit && pickTarget === g.id;
+    const full = groupEdit && quota > 0 && ms.length >= quota;
+    return `<div class="gcard${groupEdit?" editing":""}${reveal?" reveal":""}${isThief?" thiefsel":""}${isSafe?" safe":""}${isPicking?" picking":""}"
       data-gid="${g.id}" tabindex="0" role="button" style="--gc:${g.color};${reveal?`animation-delay:${i*160}ms`:""}">
       ${isThief?`<span class="thiefmark">🥷</span>`:""}
       <div class="gcard-head"><div class="gi">${g.icon}</div>
-        <div class="gn">${esc(g.name)}<small>${ms.length} คน</small></div><div class="gs">${g.session}</div></div>
+        <div class="gn">${esc(g.name)}<small>${groupEdit&&quota?`${ms.length}/${quota} คน${full?" · เต็มแล้ว":""}`:`${ms.length} คน`}</small></div><div class="gs">${g.session}</div></div>
       <div class="gmembers">${ms.length ? ms.map(s =>
         `<span class="mchip" data-sid="${s.id}"><span class="ma">${s.avatar}</span><span class="mn">${esc(s.name)}</span></span>`).join("")
         : `<span style="font-size:13px;color:#9A8FC9">ยังไม่มีสมาชิก</span>`}</div>
@@ -1547,13 +1554,32 @@ function renderGroups(reveal){
         <button class="gmini" data-gact="rename">✏️ เปลี่ยนชื่อ</button>
         <button class="gmini" data-gact="delg">🗑 ลบกลุ่ม</button></div>` : ""}</div>`;
   }).join("");
-  const poolCard = pool.length ? `<div class="gcard gpool${groupEdit?" editing":""}" data-gid="__pool">
+  const showPool = pool.length > 0 || groupEdit;
+  const poolPicking = groupEdit && pickTarget === "__pool";
+  const poolCard = showPool ? `<div class="gcard gpool${groupEdit?" editing":""}${poolPicking?" picking":""}" data-gid="__pool">
       <div class="gcard-head" style="--gc:rgba(232,179,60,.25)"><div class="gi">🕰️</div>
         <div class="gn">ยังไม่มีกลุ่ม<small>${pool.length} คน</small></div></div>
-      <div class="gmembers">${pool.map(s =>
-        `<span class="mchip" data-sid="${s.id}"><span class="ma">${s.avatar}</span><span class="mn">${esc(s.name)}</span></span>`).join("")}</div>
+      <div class="gmembers">${pool.length ? pool.map(s =>
+        `<span class="mchip" data-sid="${s.id}"><span class="ma">${s.avatar}</span><span class="mn">${esc(s.name)}</span></span>`).join("")
+        : `<span style="font-size:13px;color:#9A8FC9">ไม่มีใครรอกลุ่มอยู่</span>`}</div>
     </div>` : "";
   box.innerHTML = cards + poolCard;
+}
+function moveStudentTo(sid, targetGid){
+  const cls = activeClass(); if(!cls || !cls.groups) return;
+  cls.groups.list.forEach(g => g.members = g.members.filter(id => id !== sid));
+  if(targetGid !== "__pool"){ const g = cls.groups.list.find(x => x.id === targetGid); if(g) g.members.push(sid); }
+  sndPop();
+  // ถ้ากลุ่มเป้าหมายครบโควตาแล้ว เคลียร์การเลือกให้อัตโนมัติ พร้อมแจ้งเตือน
+  if(targetGid !== "__pool"){
+    const g = cls.groups.list.find(x => x.id === targetGid);
+    const quota = cls.groups.list.length ? Math.ceil(cls.students.length / cls.groups.list.length) : 0;
+    if(g && quota > 0 && g.members.length >= quota){
+      pickTarget = null;
+      toast(`${g.icon} ${g.name} ครบโควตาแล้ว (${g.members.length}/${quota}) เลือกกลุ่มถัดไปได้เลย`);
+    }
+  }
+  renderGroups(); save();
 }
 
 function renderBoard(){
@@ -2040,8 +2066,9 @@ $("#btnEndGroup").addEventListener("click", () => {
 $("#btnGroupEdit").addEventListener("click", e => {
   if(heist.on) heistOff(true);
   groupEdit = !groupEdit;
+  pickTarget = null;
   e.currentTarget.classList.toggle("on", groupEdit);
-  toast(groupEdit ? "แตะที่ชื่อนักเรียนเพื่อย้ายกลุ่ม" : "ปิดโหมดปรับกลุ่มแล้ว");
+  toast(groupEdit ? "แตะเลือกกลุ่มปลายทางก่อน แล้วแตะสมาชิกที่จะย้ายเข้าได้เลย" : "ปิดโหมดปรับกลุ่มแล้ว");
   render();
 });
 $("#btnGroupAdd").addEventListener("click", () => {
@@ -2078,8 +2105,15 @@ $("#ggrid").addEventListener("click", async e => {
   const gid = card.dataset.gid;
   if(heist.on){ if(gid !== "__pool") heistPick(gid); return; }
   const chip = e.target.closest(".mchip");
-  if(groupEdit && chip){ e.stopPropagation(); openMove(chip.dataset.sid); return; }
   const gb = e.target.closest("[data-gact]");
+
+  if(groupEdit && chip){
+    e.stopPropagation();
+    if(!pickTarget){ toast("👆 แตะเลือกกลุ่มปลายทางก่อน (แตะที่หัวการ์ดกลุ่ม)"); return; }
+    if(pickTarget === gid){ return; } // แตะสมาชิกในการ์ดที่กำลังเลือกเป็นเป้าหมายอยู่แล้ว ไม่ต้องทำอะไร
+    moveStudentTo(chip.dataset.sid, pickTarget);
+    return;
+  }
   if(gb){
     e.stopPropagation();
     const cls = activeClass(), g = cls.groups.list.find(x => x.id === gid);
@@ -2091,12 +2125,25 @@ $("#ggrid").addEventListener("click", async e => {
         const ok = await showConfirm(`สมาชิก ${g.members.length} คนจะกลับไปอยู่ช่อง "ยังไม่มีกลุ่ม"`, {title:`ลบ "${g.name}"?`});
         if(!ok) return;
       }
+      if(pickTarget === gid) pickTarget = null;
       cls.groups.list = cls.groups.list.filter(x => x.id !== gid);
       render(); save(); toast("ลบกลุ่มแล้ว");
     }
     return;
   }
-  if(gid === "__pool" || groupEdit) return;
+  if(groupEdit){
+    // แตะที่ตัวการ์ด (ไม่ใช่สมาชิก/ปุ่ม) = เลือก/ยกเลิกเลือกเป็นกลุ่มเป้าหมาย
+    pickTarget = (pickTarget === gid) ? null : gid;
+    renderGroups();
+    if(pickTarget){
+      const cls = activeClass();
+      const name = gid === "__pool" ? "ยังไม่มีกลุ่ม" : cls.groups.list.find(x => x.id === gid).name;
+      sndSelect();
+      toast(`🎯 เลือก "${name}" แล้ว — แตะสมาชิกที่จะย้ายเข้ากลุ่มนี้ได้เลย`);
+    }
+    return;
+  }
+  if(gid === "__pool") return;
   addGroupPoints(gid, step, e);
 });
 $("#ggrid").addEventListener("keydown", e => {
@@ -2106,23 +2153,6 @@ $("#ggrid").addEventListener("keydown", e => {
     e.preventDefault();
     if(heist.on) heistPick(gid); else if(!groupEdit) addGroupPoints(gid, step, null);
   }
-});
-function openMove(sid){
-  const cls = activeClass(), st = cls.students.find(s => s.id === sid); if(!st) return;
-  movingId = sid;
-  $("#moveTitle").textContent = `ย้าย ${st.avatar} ${st.name} ไปกลุ่มไหน`;
-  $("#moveList").innerHTML = cls.groups.list.map(g =>
-    `<button class="moveitem" data-gid="${g.id}"><span class="mi">${g.icon}</span><span>${esc(g.name)}</span>
-      <span class="mc">${g.members.length} คน</span></button>`).join("")
-    + `<button class="moveitem" data-gid="__pool"><span class="mi">🕰️</span><span>เอาออกจากกลุ่ม</span></button>`;
-  $("#mMove").classList.add("show");
-}
-$("#moveList").addEventListener("click", e => {
-  const b = e.target.closest(".moveitem"); if(!b) return;
-  const cls = activeClass(), target = b.dataset.gid;
-  cls.groups.list.forEach(g => g.members = g.members.filter(id => id !== movingId));
-  if(target !== "__pool"){ const g = cls.groups.list.find(x => x.id === target); if(g) g.members.push(movingId); }
-  $("#mMove").classList.remove("show"); sndPop(); render(); save();
 });
 
 /* ══════════ หอกิลด์ ══════════ */
