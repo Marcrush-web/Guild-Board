@@ -581,6 +581,7 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
       <span class="reorder-tip hide" id="reorderTip">⏳ จัดอันดับใหม่ใน <b id="reorderSec">3</b> วิ</span>
       <div class="spacer"></div>
       <button class="btn session-btn" id="btnEndSession" title="สรุปคะแนนคาบนี้และรีเซ็ตสำหรับคาบหน้า">🔔 ปิดคาบนี้</button>
+      <button class="btn ghost" id="btnLastSession" title="ดูคะแนนคาบที่แล้ว">📜 คาบที่แล้ว</button>
       <button class="btn thief" id="btnHeist">🥷 โจรกรรม</button>
       <button class="btn" id="btnPickOne">🎯 สุ่มชื่อ</button>
       <button class="btn" id="btnGroup">🎲 จับคู่/กลุ่ม</button>
@@ -667,6 +668,16 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
       <button class="btn ghost" id="btnSessionCancel">ปิดหน้าต่างนี้</button>
       <button class="btn gold" id="btnSessionConfirm">✅ ปิดคาบนี้</button>
     </div>
+  </div>
+</div>
+
+<!-- โมดัล: ประวัติคาบที่แล้ว (เก็บในเครื่องเท่านั้น ทับทุกครั้งที่เริ่มคาบใหม่) -->
+<div class="mask" id="mLastSession">
+  <div class="modal">
+    <h3>📜 คะแนนคาบที่แล้ว</h3>
+    <p class="sub" id="lastSessionSub">ยังไม่มีข้อมูล</p>
+    <div class="session-list" id="lastSessionList"></div>
+    <div class="actions"><button class="btn ghost" data-close>ปิด</button></div>
   </div>
 </div>
 
@@ -1117,13 +1128,14 @@ function studentEnterClass(classId){
 /* เรนเดอร์โพเดียม+รายชื่อทั้งหมด ลงในชุด element ที่กำหนด — ใช้ร่วมกันทั้งหน้านักเรียนและพรีวิวของแอดมิน */
 function renderPodiumInto(students, ids){
   const stage = $(ids.stage), base = $(ids.base), heading = $(ids.heading), grid = $(ids.grid);
+  grid.className = "grid";
   const ranked = [...students].sort((a,b) => b.points-a.points || a.name.localeCompare(b.name,"th"));
   if(ranked.length === 0){
     stage.innerHTML = ""; base.classList.add("hide"); heading.classList.add("hide");
     grid.innerHTML = `<div class="empty"><span class="ico">🏰</span><h3>ห้องนี้ยังไม่มีรายชื่อ</h3><p>รอครูเพิ่มนักเรียนก่อนนะ</p></div>`;
     return ranked;
   }
-  heading.classList.remove("hide");
+  heading.classList.remove("hide"); heading.textContent = "📜 อันดับทั้งหมดในห้อง";
   const top = ranked.slice(0,3);
   const order = top.length >= 3 ? [1,0,2] : (top.length === 2 ? [1,0] : [0]);
   const CROWN = ["👑","⚔️","🛡️"];
@@ -1170,6 +1182,7 @@ function studentRenderBoard(){
 /* เรนเดอร์โพเดียมของ "กลุ่ม" (โหมดกิจกรรมกลุ่ม) — เรียงตามคะแนนกิจกรรม g.session */
 function renderGroupPodiumInto(groups, ids){
   const stage = $(ids.stage), base = $(ids.base), heading = $(ids.heading), grid = $(ids.grid);
+  grid.className = "ggrid";
   const ranked = [...groups].sort((a,b) => b.session-a.session || a.name.localeCompare(b.name,"th"));
   if(ranked.length === 0){
     stage.innerHTML = ""; base.classList.add("hide"); heading.classList.add("hide");
@@ -1210,12 +1223,10 @@ const PODIUM_IDS_PREVIEW = {stage:"#previewPodiumStage", base:"#previewPodiumBas
 function openPodiumPreview(){
   const cls = activeClass(); if(!cls) return;
   if(mode === "group" && cls.groups){
-    $("#previewGrid").className = "ggrid";
     $("#previewHeadTitle").textContent = "🏅 พรีวิวอันดับกลุ่ม";
     $("#previewHeadTag").textContent = "สรุปคะแนนกิจกรรมกลุ่มทั้งหมด ใช้ดูภาพรวมเท่านั้น (หน้านี้นักเรียนไม่เห็น)";
     renderGroupPodiumInto(cls.groups.list, PODIUM_IDS_PREVIEW);
   }else{
-    $("#previewGrid").className = "grid";
     $("#previewHeadTitle").textContent = "🏅 พรีวิวสิ่งที่นักเรียนเห็น";
     $("#previewHeadTag").textContent = "แสดงตัวอย่างเท่านั้น แก้ไขอะไรไม่ได้จากหน้านี้";
     renderPodiumInto(cls.students, PODIUM_IDS_PREVIEW);
@@ -2273,16 +2284,40 @@ function updateSessionButton(){
     btn.classList.remove("paused");
   }
 }
+$("#btnLastSession").addEventListener("click", () => {
+  const cls = activeClass(); if(!cls) return;
+  const ls = cls.lastSession;
+  if(!ls || !ls.list || ls.list.length === 0){
+    $("#lastSessionSub").textContent = "ยังไม่มีข้อมูลคาบที่แล้ว — ข้อมูลจะขึ้นหลังกด \"เริ่มคาบนี้\" ครั้งถัดไป";
+    $("#lastSessionList").innerHTML = "";
+  }else{
+    const d = new Date(ls.closedAt);
+    const dateTxt = d.toLocaleString("th-TH", {dateStyle:"medium", timeStyle:"short"});
+    $("#lastSessionSub").textContent = `ปิดคาบเมื่อ ${dateTxt} · เรียงตามคะแนนสูงสุดก่อน`;
+    $("#lastSessionList").innerHTML = ls.list.map(s => `
+      <div class="session-row">
+        <span class="sa">${s.avatar}</span><span class="sn">${esc(s.name)}</span>
+        <span class="sp">🌟 ${s.pts}</span>
+      </div>`).join("");
+  }
+  $("#mLastSession").classList.add("show");
+});
 $("#btnEndSession").addEventListener("click", () => {
   const cls = activeClass(); if(!cls) return;
   if(cls.students.length === 0){ toast("ห้องนี้ยังไม่มีนักเรียน"); return; }
 
   if(cls.sessionActive === false){
-    // ปิดคาบอยู่ -> กดเพื่อเริ่มคาบใหม่ทันที (รีเซ็ตตัวเลขคาบนี้เป็น 0 แล้วเริ่มนับ)
+    // ปิดคาบอยู่ -> กดเพื่อเริ่มคาบใหม่ทันที (บันทึกคาบที่แล้วทับของเก่า แล้วรีเซ็ตตัวเลขคาบนี้เป็น 0)
+    cls.lastSession = {
+      closedAt: Date.now(),
+      list: cls.students.filter(s => s.sessionPts > 0)
+        .sort((a,b) => b.sessionPts - a.sessionPts)
+        .map(s => ({name:s.name, avatar:s.avatar, pts:s.sessionPts}))
+    };
     cls.students.forEach(s => s.sessionPts = 0);
     cls.sessionActive = true;
     updateSessionButton(); render(); save();
-    toast("🔔 เริ่มคาบใหม่แล้ว เริ่มนับคะแนนคาบนี้ตั้งแต่ตอนนี้");
+    toast("🔔 เริ่มคาบใหม่แล้ว บันทึกคาบที่แล้วไว้ให้ดูย้อนหลังได้ 1 คาบ");
     return;
   }
   // คาบกำลังทำงานอยู่ -> เปิดหน้าสรุปให้ดูก่อนปิด
