@@ -624,7 +624,7 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
       </main>
       <aside class="side">
         <div class="panel">
-          <h2 id="boardTitle">🏆 แท่นเกียรติยศ
+          <h2><span id="boardTitle">🏆 แท่นเกียรติยศ</span>
             <button class="btn-podium-preview" id="btnPodiumPreview" title="ดูโพเดียม/อันดับแบบพรีวิว">🏅 พรีวิว</button>
           </h2>
           <div id="board"></div>
@@ -1171,8 +1171,8 @@ function renderPodiumInto(students, ids){
 const PODIUM_IDS_STUDENT = {stage:"#podiumStage", base:"#podiumBase", heading:"#rankHeading", grid:"#stuGrid"};
 function studentRenderBoard(){
   const c = DB.classes.find(x => x.id === studentClassId); if(!c) return;
-  $("#brandSub").textContent = boardBackTarget === "admin" ? "ดูอันดับแบบที่นักเรียนเห็น" : "กระดานเกียรติยศประจำห้อง";
-  $("#btnStuBack2").textContent = boardBackTarget === "admin" ? "← กลับหลังบ้าน" : "← เลือกห้องอื่น";
+  $("#brandSub").textContent = boardBackTarget.startsWith("admin") ? "ดูอันดับแบบที่นักเรียนเห็น" : "กระดานเกียรติยศประจำห้อง";
+  $("#btnStuBack2").textContent = boardBackTarget.startsWith("admin") ? "← กลับหลังบ้าน" : "← เลือกห้องอื่น";
   stuShowSection("StuBoard");
   renderPodiumInto(c.students, PODIUM_IDS_STUDENT);
   if(c.students.length === 0){ $("#stuMeTag").textContent = ""; return; }
