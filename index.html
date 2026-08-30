@@ -6,7 +6,7 @@
 <title>กิลด์ผู้กล้า — กระดานสะสมคริสตัล</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Chakra+Petch:wght@600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Chakra+Petch:wght@600;700&display=optional" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -750,7 +750,7 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
     <div style="border-top:1px solid var(--line);margin-top:18px;padding-top:16px">
       <label style="margin-top:0">🖐️ หรือจัดกลุ่มเอง (ไม่สุ่ม)</label>
       <div class="row">
-        <input id="manualGroupCount" class="field" type="number" min="1" max="20" value="4">
+        <input id="manualGroupCount" class="field" type="number" min="1" max="30" value="4">
         <button class="btn" id="btnManualGroups" style="flex:none">สร้างกลุ่มว่าง</button>
       </div>
       <p class="hint">สร้างกลุ่มว่างตามจำนวนที่ใส่ ตั้งชื่อสุ่มให้ก่อน (ไปเปลี่ยนชื่อทีหลังได้) นักเรียนทุกคนไปกองที่ "ยังไม่มีกลุ่ม" แตะเพื่อย้ายเข้ากลุ่มเองได้ทันที</p>
@@ -910,7 +910,16 @@ const PARTY = [
   {n:"ยูนิคอร์น",i:"🦄",c:"rgba(255,127,168,.45)"},{n:"พญานาค",i:"🐍",c:"rgba(63,191,143,.45)"},
   {n:"ราชสีห์",i:"🦁",c:"rgba(232,179,60,.45)"},{n:"หมีขาว",i:"🐻‍❄️",c:"rgba(140,200,255,.42)"},
   {n:"เต่าศิลา",i:"🐢",c:"rgba(120,200,140,.42)"},{n:"เหยี่ยวเวหา",i:"🪽",c:"rgba(155,123,255,.45)"},
-  {n:"วาฬน้ำเงิน",i:"🐋",c:"rgba(90,150,255,.45)"},{n:"แมงมุมเงา",i:"🕷️",c:"rgba(160,120,200,.42)"}
+  {n:"วาฬน้ำเงิน",i:"🐋",c:"rgba(90,150,255,.45)"},{n:"แมงมุมเงา",i:"🕷️",c:"rgba(160,120,200,.42)"},
+  {n:"เสือลายฟ้า",i:"🐯",c:"rgba(90,170,255,.45)"},{n:"กระต่ายจันทรา",i:"🐰",c:"rgba(220,180,255,.42)"},
+  {n:"ปลาหมึกยักษ์",i:"🐙",c:"rgba(200,110,220,.42)"},{n:"ผีเสื้อทอง",i:"🦋",c:"rgba(255,200,90,.45)"},
+  {n:"ม้าลายเวท",i:"🦓",c:"rgba(210,210,220,.4)"},{n:"จิ้งจอกเก้าหาง",i:"🦊",c:"rgba(255,140,90,.45)"},
+  {n:"แพนด้ายักษ์",i:"🐼",c:"rgba(140,140,150,.4)"},{n:"โคอาล่าดาว",i:"🐨",c:"rgba(150,150,170,.4)"},
+  {n:"ช้างศึก",i:"🐘",c:"rgba(150,170,190,.4)"},{n:"แรดเหล็ก",i:"🦏",c:"rgba(170,180,160,.4)"},
+  {n:"ยีราฟฟ้า",i:"🦒",c:"rgba(240,200,110,.42)"},{n:"กวางเรืองแสง",i:"🦌",c:"rgba(190,160,220,.42)"},
+  {n:"แมวป่าราตรี",i:"🐆",c:"rgba(230,190,130,.42)"},{n:"ปูอัคคี",i:"🦀",c:"rgba(255,120,90,.45)"},
+  {n:"ผึ้งทอง",i:"🐝",c:"rgba(255,215,90,.45)"},{n:"หอยทากคริสตัล",i:"🐌",c:"rgba(150,220,190,.42)"},
+  {n:"ไก่ฟ้าสายรุ้ง",i:"🐓",c:"rgba(255,150,150,.42)"},{n:"ฉลามสายฟ้า",i:"🦈",c:"rgba(100,160,220,.45)"}
 ];
 const KEY = "guild-board-v2";
 
@@ -2044,7 +2053,7 @@ $("#btnGroupStart").addEventListener("click", () => startDraw("group"));
 $("#btnManualGroups").addEventListener("click", () => {
   const cls = activeClass();
   if(!cls || cls.students.length === 0){ toast("ห้องนี้ยังไม่มีนักเรียน"); return; }
-  const n = Math.min(20, Math.max(1, parseInt($("#manualGroupCount").value,10) || 4));
+  const n = Math.min(30, Math.max(1, parseInt($("#manualGroupCount").value,10) || 4));
   const names = shuffle(PARTY);
   cls.groups = {
     createdAt: Date.now(), type:"manual", mix:"manual",
