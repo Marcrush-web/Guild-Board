@@ -431,6 +431,20 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
 .session-row .sp{font-family:'Chakra Petch',sans-serif;font-weight:700;font-size:18px;color:var(--gold-lite);flex:none}
 .session-row.zero{opacity:.45}
 .session-row.zero .sp{color:#9A8FC9}
+
+/* ══ ประวัติ/เทียบคะแนนรายเทอม ══ */
+.th-row{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.05);
+  border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:9px 13px;cursor:pointer}
+.th-row:hover{background:rgba(255,255,255,.09)}
+.th-row .thn{flex:1;font-size:14.5px;color:#EFE9FF}
+.th-row .thd{font-size:12px;color:#9A8FC9;flex:none}
+.th-table-wrap{max-height:56vh;overflow:auto;border:1px solid rgba(255,255,255,.1);border-radius:12px;margin-bottom:4px}
+.th-table{width:100%;border-collapse:collapse;font-size:13px;white-space:nowrap}
+.th-table th,.th-table td{padding:8px 11px;text-align:center;border-bottom:1px solid rgba(255,255,255,.07)}
+.th-table th{background:rgba(255,255,255,.06);color:var(--gold-lite);font-family:'Chakra Petch',sans-serif;position:sticky;top:0}
+.th-table td:first-child,.th-table th:first-child{text-align:left;position:sticky;left:0;background:#1C1538;color:#EFE9FF}
+.th-table td.cur{color:var(--gold-lite);font-weight:700}
+.th-table td.dash{color:#6B6190}
 @media(max-width:600px){
   .podium-stage{gap:5px;margin-bottom:24px}
   .pod .hero{width:54px;height:54px;font-size:29px;margin-bottom:-10px}
@@ -890,8 +904,32 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
     </div>
     <input type="file" id="fileIn" accept="application/json" hidden>
     <label>เริ่มเทอมใหม่</label>
-    <button class="btn danger" id="btnReset" style="width:100%">♻️ ล้างแต้มทั้งห้องที่เปิดอยู่ (เก็บรายชื่อไว้)</button>
+    <button class="btn danger" id="btnReset" style="width:100%">♻️ ปิดเทอม &amp; ล้างแต้ม (เก็บรายชื่อไว้)</button>
+    <button class="btn ghost" id="btnTermHistory" style="width:100%;margin-top:8px">📊 ดูประวัติ/เทียบคะแนนรายเทอม</button>
     <p class="hint">คีย์ลัด: <b>Ctrl + Z</b> ย้อนกลับแต้มล่าสุด · <b>Esc</b> ปิดหน้าต่าง/ออกจากโหมดโจรกรรม</p>
+    <div class="actions"><button class="btn ghost" data-close>ปิด</button></div>
+  </div>
+</div>
+
+<div class="mask" id="mTermHistory">
+  <div class="modal">
+    <h3 id="thTitle">ประวัติคะแนนรายเทอม</h3>
+    <p class="sub" id="thSub">ห้องนี้ยังไม่มีประวัติเทอมที่ปิดไปแล้ว</p>
+    <div id="thListWrap">
+      <div class="session-list" id="thList"></div>
+      <div class="actions" style="margin-top:10px">
+        <button class="btn gold" id="btnTermCompare" style="width:100%">📈 เทียบคะแนนทุกเทอม</button>
+      </div>
+    </div>
+    <div id="thViewWrap" class="hide">
+      <p class="sub" id="thViewSub"></p>
+      <div class="session-list" id="thViewList"></div>
+      <div class="actions"><button class="btn ghost" id="btnThBack" style="width:100%">⬅ กลับไปรายการเทอม</button></div>
+    </div>
+    <div id="thCompareWrap" class="hide">
+      <div class="th-table-wrap"><table class="th-table" id="thCompareTable"></table></div>
+      <div class="actions"><button class="btn ghost" id="btnThCompareBack" style="width:100%">⬅ กลับไปรายการเทอม</button></div>
+    </div>
     <div class="actions"><button class="btn ghost" data-close>ปิด</button></div>
   </div>
 </div>
@@ -967,6 +1005,7 @@ function normalizeDB(db){
     if(!c.icon) c.icon = ROOM_ICONS[i % ROOM_ICONS.length];
     if(typeof c.sessionActive !== "boolean") c.sessionActive = true;
     if(typeof c.groupModeActive !== "boolean") c.groupModeActive = false;
+    if(!Array.isArray(c.termHistory)) c.termHistory = [];
     c.students.forEach(s => { if(typeof s.sessionPts !== "number") s.sessionPts = 0; });
   });
   return db;
@@ -2513,13 +2552,107 @@ $("#fileIn").addEventListener("change", e => {
 $("#btnReset").addEventListener("click", async () => {
   const cls = activeClass();
   if(!cls){ toast("เข้าห้องเรียนก่อนจึงจะล้างแต้มได้"); return; }
-  const ok = await showConfirm("รายชื่อยังอยู่ครบ", {title:`ล้างแต้มของทุกคนในห้อง "${cls.name}" ให้เป็น 0?`});
+  const ok = await showConfirm("รายชื่อยังอยู่ครบ ระบบจะเก็บคะแนนปัจจุบันไว้เป็นประวัติก่อนล้าง (ดูย้อนหลังได้ทีหลัง)",
+    {title:`ปิดเทอม &amp; ล้างแต้มของทุกคนในห้อง "${cls.name}"?`, yesLabel:"ปิดเทอม & ล้างแต้ม"});
   if(!ok) return;
+  const defLabel = `เทอม ${cls.termHistory.length + 1}`;
+  const label = await showPrompt("ตั้งชื่อเทอมนี้ (เช่น เทอม 1/2568) เพื่อเก็บไว้ดูย้อนหลัง", defLabel);
+  if(label === null) return;
+  cls.termHistory.push({
+    id: uid(),
+    label: label || defLabel,
+    closedAt: Date.now(),
+    students: cls.students.map(s => ({id:s.id, name:s.name, avatar:s.avatar, points:s.points, sessionPts:s.sessionPts}))
+  });
   cls.students.forEach(s => { s.points = 0; s.sessionPts = 0; });
   cls.sessionActive = true;
   if(cls.groups) cls.groups.list.forEach(g => g.session = 0);
-  undoStack = []; heistLog = []; render(); save(); toast("ล้างแต้มเรียบร้อย เริ่มเทอมใหม่ได้เลย");
+  undoStack = []; heistLog = []; render(); save(); toast(`บันทึก "${label || defLabel}" ไว้แล้ว ล้างแต้มเรียบร้อย เริ่มเทอมใหม่ได้เลย`);
 });
+
+/* ══════════ ประวัติ/เทียบคะแนนรายเทอม ══════════ */
+function thShowList(){
+  $("#thViewWrap").classList.add("hide");
+  $("#thCompareWrap").classList.add("hide");
+  $("#thListWrap").classList.remove("hide");
+  const cls = activeClass();
+  const hist = (cls && cls.termHistory) || [];
+  if(!hist.length){
+    $("#thSub").textContent = "ห้องนี้ยังไม่มีประวัติเทอมที่ปิดไปแล้ว";
+    $("#thList").innerHTML = "";
+    $("#btnTermCompare").classList.add("hide");
+    return;
+  }
+  $("#thSub").textContent = "แตะเทอมที่ต้องการดู หรือกดเทียบคะแนนทุกเทอมด้านล่าง";
+  $("#btnTermCompare").classList.remove("hide");
+  $("#thList").innerHTML = [...hist].reverse().map(t => {
+    const d = new Date(t.closedAt);
+    const dateTxt = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543}`;
+    return `<div class="th-row" data-term="${t.id}">
+      <span class="thn">📜 ${t.label}</span>
+      <span class="thd">${dateTxt} · ${t.students.length} คน</span>
+    </div>`;
+  }).join("");
+  $("#thList").querySelectorAll(".th-row").forEach(row => {
+    row.addEventListener("click", () => thShowTerm(row.dataset.term));
+  });
+}
+function thShowTerm(termId){
+  const cls = activeClass();
+  const t = cls.termHistory.find(x => x.id === termId);
+  if(!t) return;
+  $("#thListWrap").classList.add("hide");
+  $("#thCompareWrap").classList.add("hide");
+  $("#thViewWrap").classList.remove("hide");
+  const d = new Date(t.closedAt);
+  const dateTxt = `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()+543}`;
+  $("#thViewSub").textContent = `📜 ${t.label} · ปิดเมื่อ ${dateTxt} · เรียงตามคะแนนสูงสุดก่อน`;
+  const list = [...t.students].sort((a,b) => b.points - a.points);
+  $("#thViewList").innerHTML = list.map(s => `
+    <div class="session-row${s.points===0 ? " zero" : ""}">
+      <span class="sa">${s.avatar}</span><span class="sn">${s.name}</span><span class="sp">${s.points}</span>
+    </div>`).join("");
+}
+function thShowCompare(){
+  const cls = activeClass();
+  const hist = cls.termHistory;
+  if(!hist.length) return;
+  $("#thListWrap").classList.add("hide");
+  $("#thViewWrap").classList.add("hide");
+  $("#thCompareWrap").classList.remove("hide");
+  // รวมรายชื่อนักเรียนทุกคนที่เคยปรากฏในทุกเทอม + ปัจจุบัน
+  const names = new Map();
+  hist.forEach(t => t.students.forEach(s => { if(!names.has(s.id)) names.set(s.id, {name:s.name, avatar:s.avatar}); }));
+  cls.students.forEach(s => { if(!names.has(s.id)) names.set(s.id, {name:s.name, avatar:s.avatar}); else names.set(s.id, {name:s.name, avatar:s.avatar}); });
+  const rows = [...names.entries()].map(([id, info]) => {
+    const vals = hist.map(t => {
+      const found = t.students.find(s => s.id === id);
+      return found ? found.points : null;
+    });
+    const curS = cls.students.find(s => s.id === id);
+    const cur = curS ? curS.points : null;
+    return {id, name:info.name, avatar:info.avatar, vals, cur};
+  });
+  rows.sort((a,b) => (b.cur ?? -1) - (a.cur ?? -1));
+  let html = "<thead><tr><th>ผู้กล้า</th>" + hist.map(t => `<th>${t.label}</th>`).join("") + "<th>ปัจจุบัน</th></tr></thead><tbody>";
+  rows.forEach(r => {
+    html += `<tr><td>${r.avatar} ${r.name}</td>`;
+    r.vals.forEach(v => { html += v===null ? `<td class="dash">–</td>` : `<td>${v}</td>`; });
+    html += r.cur===null ? `<td class="dash">–</td>` : `<td class="cur">${r.cur}</td>`;
+    html += `</tr>`;
+  });
+  html += "</tbody>";
+  $("#thCompareTable").innerHTML = html;
+}
+$("#btnTermHistory").addEventListener("click", () => {
+  const cls = activeClass();
+  if(!cls){ toast("เข้าห้องเรียนก่อนจึงจะดูประวัติเทอมได้"); return; }
+  thShowList();
+  $("#mTermHistory").classList.add("show");
+});
+$("#btnTermCompare").addEventListener("click", thShowCompare);
+$("#btnThBack").addEventListener("click", thShowList);
+$("#btnThCompareBack").addEventListener("click", thShowList);
 
 /* ══════════ เริ่มทำงาน ══════════ */
 (async function init(){
