@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="th" data-theme="sky">
 <head>
 <meta charset="UTF-8">
+<meta name="theme-color" content="#B6E8FF">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>กิลด์ผู้กล้า — กระดานสะสมคริสตัล</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Chakra+Petch:wght@600;700&display=optional" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600&family=Chakra+Petch:wght@600;700&family=Kanit:wght@500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 :root{
@@ -504,6 +505,475 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
   .ggrid{grid-template-columns:1fr}
 }
 @media (prefers-reduced-motion:reduce){*,*::before{animation:none!important;transition:none!important}}
+
+/* ═══════════════════════════════════════════════════════════
+   v18 — ธีมเกมกิลด์ + เว้นระยะจากขอบจอ + ใช้งานสบายขึ้น
+   (เพิ่มต่อท้าย ไม่แตะ logic ใน JS)
+   ═══════════════════════════════════════════════════════════ */
+:root{
+  --pad-x:clamp(18px,4.4vw,88px);
+  --pad-top:clamp(18px,3.2vh,40px);
+  --gap:clamp(14px,1.7vw,26px);
+  --radius:20px;
+  --gold-deep:#8A5E0F;
+  --frame:rgba(232,179,60,.38);
+}
+html{scrollbar-color:rgba(232,179,60,.5) #150F30}
+*{scrollbar-color:rgba(232,179,60,.5) transparent}
+
+/* ── พื้นหลัง: ท้องฟ้า + ปราสาท + ประกายไฟลอย ── */
+body{
+  background:
+    radial-gradient(1100px 650px at 12% -10%, #43297F 0%, transparent 60%),
+    radial-gradient(900px 540px at 92% 0%, #1F4278 0%, transparent 55%),
+    radial-gradient(700px 400px at 50% 110%, rgba(255,107,53,.16) 0%, transparent 70%),
+    var(--night);
+  background-attachment:fixed;
+}
+body::after{
+  content:"";position:fixed;left:0;right:0;bottom:0;height:min(34vh,280px);pointer-events:none;z-index:0;opacity:.6;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 200' preserveAspectRatio='xMidYMax slice'><g fill='%230B0620'><path d='M0 200V150l40-20 40 20v-30h20v-18l10-12 10 12v18h20v30l30-14 30 14v-60h16V62l14-14 14 14v28h16v60l36 14V120h18l12-22 12 22h18v50l30-20v-24h14V90l12-16 12 16v36h14v24l34 20V130h24l16-26 16 26h24v70z'/><path d='M640 200v-70h14v-30l10-16 10 16v30h14v-52h12V58l12-16 12 16v20h12v52h14v70zM860 200v-40l22-14 22 14v-26h12v-18l8-12 8 12v18h12v26l22-14 22 14v40zM1010 200v-60h18v-34l12-18 12 18v34h18v60z'/></g></svg>") bottom center/cover no-repeat;
+}
+html::after{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    radial-gradient(3px 3px at 8% 40%, rgba(255,190,90,.9), transparent 70%),
+    radial-gradient(2.4px 2.4px at 31% 75%, rgba(255,150,70,.8), transparent 70%),
+    radial-gradient(2.8px 2.8px at 57% 20%, rgba(255,210,120,.85), transparent 70%),
+    radial-gradient(2.2px 2.2px at 83% 60%, rgba(255,170,80,.8), transparent 70%),
+    radial-gradient(3px 3px at 20% 15%, rgba(190,160,255,.8), transparent 70%),
+    radial-gradient(2.4px 2.4px at 72% 88%, rgba(190,160,255,.7), transparent 70%);
+  background-size:100% 620px,100% 620px,100% 620px,100% 620px,100% 930px,100% 930px;
+  animation:embers 26s linear infinite;
+}
+@keyframes embers{
+  from{background-position:0 0,0 0,0 0,0 0,0 0,0 0}
+  to{background-position:0 -620px,0 -620px,0 -620px,0 -620px,0 -930px,0 -930px}
+}
+
+/* ── ระยะห่างจากขอบจอ ── */
+.wrap{max-width:1680px;padding:var(--pad-top) var(--pad-x) 72px}
+
+/* ── แถบหัว (HUD) ── */
+.topbar{
+  gap:12px;padding:14px 22px;margin-bottom:clamp(20px,2.6vw,34px);border-radius:24px;border:1px solid var(--frame);
+  background:linear-gradient(180deg,rgba(62,43,124,.92),rgba(22,15,50,.9));
+  box-shadow:0 22px 44px -22px rgba(0,0,0,.95),
+    inset 0 1px 0 rgba(255,255,255,.14),
+    inset 0 0 0 3px rgba(21,15,48,.65),
+    inset 0 0 0 4px rgba(232,179,60,.16);
+  backdrop-filter:blur(10px);
+}
+.crest{width:50px;height:50px;font-size:25px;animation:crestglow 3.2s ease-in-out infinite}
+@keyframes crestglow{0%,100%{box-shadow:0 0 18px rgba(232,179,60,.4),inset 0 -3px 6px rgba(0,0,0,.3)}
+  50%{box-shadow:0 0 34px rgba(255,217,122,.75),inset 0 -3px 6px rgba(0,0,0,.3)}}
+.brand h1{font-size:clamp(19px,2vw,25px);filter:drop-shadow(0 2px 8px rgba(232,179,60,.35))}
+.brand small{font-size:12.5px}
+
+/* ── ปุ่มสไตล์เกม (กดแล้วยุบลง) ── */
+.btn{
+  border-radius:14px;padding:10px 18px;min-height:42px;border:1px solid rgba(232,179,60,.32);
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04));
+  box-shadow:0 4px 0 rgba(0,0,0,.38);
+  transition:transform .12s,box-shadow .12s,background .15s,filter .15s;
+}
+.btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 rgba(0,0,0,.38),0 10px 18px -8px rgba(232,179,60,.3)}
+.btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.38)}
+.btn.gold,.btn.on{box-shadow:0 4px 0 var(--gold-deep),0 12px 20px -8px rgba(232,179,60,.55);border-color:rgba(255,240,200,.5)}
+.btn.gold:hover,.btn.on:hover{box-shadow:0 6px 0 var(--gold-deep),0 14px 24px -8px rgba(232,179,60,.7)}
+.btn.gold:active,.btn.on:active{box-shadow:0 1px 0 var(--gold-deep)}
+.btn.thief{box-shadow:0 4px 0 #4B1B73}
+.btn.thief:hover{box-shadow:0 6px 0 #4B1B73,0 10px 18px -8px rgba(196,107,255,.5)}
+.btn.thief:active{box-shadow:0 1px 0 #4B1B73}
+.btn.thief.on{box-shadow:0 4px 0 #6C2BA1,0 12px 20px -8px rgba(196,107,255,.6)}
+.btn.danger{box-shadow:0 4px 0 rgba(120,40,10,.6)}
+.btn.danger:active{box-shadow:0 1px 0 rgba(120,40,10,.6)}
+.btn.ghost{box-shadow:none;background:transparent}
+.btn.ghost:hover{box-shadow:none;transform:translateY(-1px)}
+.btn.ghost:active{transform:translateY(1px)}
+.iconbtn{width:44px;height:44px;border-radius:14px;box-shadow:0 4px 0 rgba(0,0,0,.35);
+  background:linear-gradient(180deg,rgba(255,255,255,.12),rgba(255,255,255,.04))}
+.iconbtn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,.35)}
+.admin-tab{padding:9px 16px;font-size:13.5px}
+.field{border-radius:12px;padding:11px 14px}
+.chip{padding:8px 17px;border-radius:11px}
+.chipset{padding:5px;border-radius:14px;box-shadow:inset 0 2px 6px rgba(0,0,0,.4)}
+.syncbtn .dot{border-color:#2A1C58}
+
+/* ── แถบเครื่องมือ (ติดบนจอตอนเลื่อน เหมาะกับห้องที่มีนักเรียนเยอะ) ── */
+.toolbar{
+  gap:12px;padding:14px 18px;margin-bottom:clamp(18px,2.2vw,28px);border-radius:20px;
+  background:linear-gradient(180deg,rgba(40,27,86,.92),rgba(24,16,55,.92));
+  border:1px solid rgba(232,179,60,.26);
+  box-shadow:0 14px 30px -18px rgba(0,0,0,.9),inset 0 1px 0 rgba(255,255,255,.08);
+  position:sticky;top:12px;z-index:30;backdrop-filter:blur(10px);
+}
+.toolbar.group{background:linear-gradient(180deg,rgba(20,70,58,.92),rgba(16,34,44,.92));border-color:rgba(63,191,143,.5)}
+.heistbar{padding:13px 18px;margin-bottom:clamp(18px,2.2vw,28px);border-radius:20px}
+.reorder-tip{border-radius:20px}
+
+/* ── หอกิลด์ ── */
+.lobby-head{margin:clamp(14px,3vh,34px) 0 clamp(26px,4vh,44px)}
+.lobby-head h2{font-size:clamp(25px,3vw,38px);text-shadow:0 0 28px rgba(232,179,60,.45),0 3px 0 rgba(0,0,0,.35);letter-spacing:.4px}
+.lobby-head p{font-size:clamp(14px,1.3vw,16px)}
+.lobby-head::after{content:"";display:block;width:min(380px,62%);height:2px;margin:20px auto 0;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);box-shadow:0 0 14px rgba(232,179,60,.6)}
+.lobby-grid{grid-template-columns:repeat(auto-fill,minmax(270px,340px));justify-content:center;gap:var(--gap)}
+.room-card{
+  padding:22px 20px 18px;border-radius:24px;border:1px solid var(--frame);
+  background:linear-gradient(165deg,rgba(70,48,140,.95),rgba(24,16,56,.96));
+  box-shadow:var(--shadow),inset 0 1px 0 rgba(255,255,255,.12),inset 0 0 0 4px rgba(21,15,48,.55),inset 0 0 0 5px rgba(232,179,60,.14);
+}
+.room-card:hover{transform:translateY(-8px) rotate(-.4deg);box-shadow:0 26px 44px -18px rgba(0,0,0,.9),0 0 0 2px rgba(232,179,60,.7),0 0 36px -4px rgba(232,179,60,.45)}
+.room-icon{width:72px;height:72px;font-size:38px;border-radius:50%;margin-bottom:14px;
+  background:radial-gradient(circle at 35% 30%,rgba(255,217,122,.35),rgba(155,123,255,.22));
+  border:2px solid rgba(232,179,60,.55);box-shadow:0 0 22px rgba(232,179,60,.3),inset 0 -3px 8px rgba(0,0,0,.3)}
+.room-card h3{font-size:22px}
+.room-meta{font-size:13px}
+.room-champ{padding:9px 12px;border-radius:12px;border:1px solid rgba(255,255,255,.07)}
+.new-room{min-height:260px;border-radius:24px;border-width:2px;background:rgba(232,179,60,.04)}
+.new-room span{font-size:46px;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+.new-room:hover span{transform:rotate(90deg) scale(1.15)}
+
+/* ── การ์ดนักเรียน ── */
+.stage{grid-template-columns:minmax(0,1fr) 320px;gap:var(--gap)}
+.grid{grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:var(--gap)}
+.grid.big{grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.card{
+  border-radius:20px;
+  box-shadow:0 14px 26px -12px rgba(0,0,0,.8),inset 0 0 0 1px rgba(60,40,10,.2),inset 0 0 0 5px rgba(255,255,255,.22);
+}
+.card:hover{transform:translateY(-7px) rotate(-.6deg)}
+.card-band{padding:9px 12px;font-size:12px}
+.card-body{padding:16px 14px 14px;gap:8px;
+  background:radial-gradient(120px 90px at 50% 0%,rgba(255,255,255,.5),transparent 70%)}
+.ava{width:62px;height:62px;font-size:33px;
+  box-shadow:0 0 0 3px #fff,0 0 0 5px rgba(232,179,60,.85),0 8px 14px rgba(0,0,0,.28)}
+.grid.big .ava{width:82px;height:82px;font-size:44px}
+.score{text-shadow:0 2px 0 rgba(255,255,255,.55)}
+.gem{width:10px;height:10px}
+/* ผู้กล้า 3 อันดับแรก ได้กรอบทอง */
+.card:has(.no.top){
+  box-shadow:0 14px 26px -12px rgba(0,0,0,.8),0 0 0 2px var(--gold),0 0 26px -2px rgba(232,179,60,.55),inset 0 0 0 5px rgba(255,255,255,.28);
+}
+.card:has(.no.top) .card-band{background:linear-gradient(90deg,#4F3710,#9A7018 50%,#4F3710);color:#FFF3D0}
+.card-foot{padding:0 10px 10px}
+.mini{padding:6px 12px;border-radius:9px}
+.session-badge{padding:3px 11px}
+
+/* ── การ์ดกลุ่ม ── */
+.ggrid{grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:var(--gap)}
+.gcard{border-radius:20px;border-color:var(--frame);
+  box-shadow:var(--shadow),inset 0 0 0 4px rgba(21,15,48,.5),inset 0 0 0 5px rgba(232,179,60,.12)}
+.gcard-head{padding:14px 15px}
+.gmembers{padding:12px 15px 16px;gap:7px}
+.gcard-foot{padding:0 15px 14px}
+
+/* ── แผงด้านข้าง ── */
+.side{gap:var(--gap);top:84px}
+.panel{padding:18px;border-radius:22px;border-color:var(--frame);
+  background:linear-gradient(180deg,rgba(50,34,104,.78),rgba(21,15,48,.78));
+  box-shadow:var(--shadow),inset 0 0 0 4px rgba(21,15,48,.45),inset 0 0 0 5px rgba(232,179,60,.1)}
+.panel h2{font-size:16px;padding-bottom:11px;margin-bottom:14px;border-bottom:1px dashed rgba(232,179,60,.28)}
+.rank-row{padding:9px 4px}
+.stat{border-radius:13px;padding:11px 12px;border:1px solid rgba(255,255,255,.06)}
+.empty{border-radius:24px;padding:64px 24px;background:rgba(232,179,60,.04)}
+
+/* ── โพเดียม ── */
+.podium-stage{max-width:880px;margin:22px auto 0;gap:clamp(10px,2.2vw,26px);padding:22px 12px 0;
+  background:radial-gradient(420px 260px at 50% 55%,rgba(232,179,60,.14),transparent 70%)}
+.podium-base{max-width:760px;height:12px;margin-bottom:34px;box-shadow:0 8px 20px -6px rgba(232,179,60,.4)}
+.rank-heading{font-size:clamp(17px,1.6vw,20px);margin-bottom:18px}
+.stu-topline{padding:12px 18px;margin-bottom:clamp(18px,2.2vw,28px);border-radius:20px}
+
+/* ── โมดัล / หน้าต่างลอย ให้ห่างขอบจอ ── */
+.mask,.draw,.preview-overlay{padding:clamp(18px,4vw,48px)}
+.modal{border-radius:26px;padding:clamp(22px,3vw,34px);border-color:var(--frame);
+  background:linear-gradient(180deg,#31216B,#1A1240);
+  box-shadow:0 34px 80px rgba(0,0,0,.75),inset 0 1px 0 rgba(255,255,255,.1),inset 0 0 0 4px rgba(21,15,48,.5),inset 0 0 0 5px rgba(232,179,60,.14)}
+.modal h3{font-size:21px}
+.modal .crest{width:60px;height:60px;font-size:30px}
+.preview-box{border-radius:26px;padding:26px 24px 30px}
+.gate{padding:clamp(18px,4vw,40px)}
+.gate-box{border-radius:26px;padding:32px 28px}
+.opt{padding:10px 16px;border-radius:12px}
+.pickgrid{border-radius:14px;padding:10px}
+.teacher-link{margin-top:36px}
+
+/* ── ซ่อนแถบแจ้งเตือนให้มิดจริง (v17 โผล่ขอบจอ) ── */
+.banner{top:clamp(16px,3vh,34px);opacity:0;visibility:hidden;transform:translate(-50%,-40px);
+  transition:transform .5s cubic-bezier(.2,1.6,.4,1),opacity .25s,visibility 0s linear .5s}
+.banner.show{opacity:1;visibility:visible;transform:translate(-50%,0);
+  transition:transform .5s cubic-bezier(.2,1.6,.4,1),opacity .25s,visibility 0s}
+.toast,.synctip{bottom:clamp(20px,4vh,40px);opacity:0;visibility:hidden;transform:translate(-50%,30px);
+  transition:transform .35s,opacity .25s,visibility 0s linear .35s}
+.toast.show,.synctip.show{opacity:1;visibility:visible;transform:translate(-50%,0);
+  transition:transform .35s,opacity .25s,visibility 0s}
+
+/* ── จอเล็ก ── */
+@media(max-width:1000px){
+  .stage{grid-template-columns:1fr}
+  .side{position:static}
+}
+@media(max-width:800px){
+  .toolbar{position:static}
+}
+@media(max-width:600px){
+  :root{--pad-x:14px}
+  .topbar{padding:12px 14px;border-radius:20px}
+  .crest{width:42px;height:42px;font-size:21px}
+  .lobby-grid{grid-template-columns:1fr;max-width:380px;margin:0 auto}
+  .grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+  .modal{border-radius:22px}
+}
+@media(min-width:1800px){
+  .grid{grid-template-columns:repeat(auto-fill,minmax(210px,1fr))}
+}
+@media (prefers-reduced-motion:reduce){html::after,body::after{animation:none!important}}
+
+/* ── แถบหัวในห้อง: ให้พอดีบรรทัดเดียวบนจอโน้ตบุ๊ก ── */
+.topbar #classSel{max-width:clamp(130px,15vw,210px);text-overflow:ellipsis}
+.topbar .admin-tab{padding:9px 13px}
+@media(max-width:1280px){
+  .topbar{gap:9px}
+  .topbar .admin-badge{display:none}
+}
+@keyframes wobble{0%,100%{transform:rotate(-4deg)}50%{transform:rotate(4deg) translateY(-2px)}}
+@keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-12deg) scale(1.1)}75%{transform:rotate(12deg) scale(1.1)}}
+@keyframes cloudbob{from{transform:translateY(0)}to{transform:translateY(10px)}}
+html[data-theme="sky"]{
+  --g-bg:linear-gradient(180deg,#7FD3FF 0%,#B6E8FF 35%,#E4F7FF 68%,#FFF4D6 100%);
+  --g-ink:#17356B;--g-slate:#4B6A9B;--g-surf:#FFFFFF;--g-surf2:#F1F9FF;--g-line:#BFD9F5;--g-lip:#A9C8EC;
+  --g-p1:#FFB04A;--g-p2:#FF7A45;--g-pd:#C9501F;--g-ptext:#fff;
+  --g-a1:#FFE680;--g-a2:#FFC53D;--g-ad:#C99100;--g-atext:#5A3A00;
+  --g-b1:#4FA8FF;--g-b2:#6A5CFF;--g-rim1:#4FA8FF;--g-rim2:#B58CFF;--g-rim3:#FFC53D;
+  --g-h1:#2F7BFF;--g-h2:#6A4CFF;--g-score:#FF6A33;--g-glow:rgba(79,168,255,.38);--g-shadow:rgba(23,53,107,.32);
+  --g-modal1:#2D55B0;--g-modal2:#1B2F78;--g-soft:#FFF3CF;--g-mint:#D5F7E8;--g-mintink:#0F6B4A;--g-lav:#EADFFF;--g-lavink:#4B1B73;
+  --g-danger:#D9411E;--g-dot1:rgba(255,255,255,.95);--g-dot2:rgba(255,230,128,.95);--g-dot3:rgba(160,200,255,.95)}
+@keyframes sheen{from{background-position:0 0}to{background-position:-260% 0}}
+::selection{background:var(--t-accent,#FFD84D);color:#2A1B00}
+html{scroll-behavior:smooth}
+/* กล่องยืนยัน/กรอกข้อมูล ต้องอยู่เหนือหน้าต่างอื่นเสมอ (v17: ถูกซ่อนหลังหน้าต่างแก้ไข) */
+#mConfirm,#mPrompt{z-index:1500}
+.ring,.stat b,.score{font-variant-numeric:tabular-nums}
+
+html[data-theme="sky"]{--ink:var(--g-ink);--ink-soft:var(--g-slate);--line:var(--g-line);--shadow:0 14px 30px -14px var(--g-shadow);
+  --gold:var(--g-a2);--gold-lite:var(--g-a1);--radius:22px;
+  --g-rim:linear-gradient(135deg,var(--g-rim1),var(--g-rim2),var(--g-rim3));
+  --g-pgrad:linear-gradient(180deg,var(--g-p1),var(--g-p2));
+  --g-agrad:linear-gradient(180deg,var(--g-a1),var(--g-a2));
+  --g-bgrad:linear-gradient(135deg,var(--g-b1),var(--g-b2))}
+html[data-theme="sky"] body{color:var(--g-ink);background:var(--g-bg);background-attachment:fixed}
+html[data-theme="sky"] body::before{display:none}
+html[data-theme="sky"]::after{
+  opacity:1;
+  background-image:
+    radial-gradient(circle 16px at 8% 40%, var(--g-dot1), transparent 72%),
+    radial-gradient(circle 12px at 31% 75%, var(--g-dot2), transparent 72%),
+    radial-gradient(circle 14px at 57% 20%, var(--g-dot3), transparent 72%),
+    radial-gradient(circle 16px at 83% 60%, var(--g-dot1), transparent 72%),
+    radial-gradient(circle 11px at 20% 15%, var(--g-dot2), transparent 72%),
+    radial-gradient(circle 13px at 72% 88%, var(--g-dot3), transparent 72%);
+}
+html[data-theme="sky"] body::after{inset:0;height:auto;opacity:1;animation:cloudbob 8s ease-in-out infinite alternate}
+html[data-theme="sky"][data-theme="sky"] body::after{background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120'><path d='M40 104a28 28 0 0 1-2-56a38 38 0 0 1 72-10a30 30 0 0 1 52 22a26 26 0 0 1-6 44z' fill='white' fill-opacity='.92'/></svg>") no-repeat right 5% top 20%/170px auto,url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 120'><path d='M40 104a28 28 0 0 1-2-56a38 38 0 0 1 72-10a30 30 0 0 1 52 22a26 26 0 0 1-6 44z' fill='white' fill-opacity='.92'/></svg>") no-repeat left 3% top 46%/120px auto,url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 220' preserveAspectRatio='none'><path d='M0 110C180 40 380 150 600 90S1020 40 1200 100V220H0z' fill='%238FE0A6' fill-opacity='.7'/><path d='M0 150C220 90 420 190 640 140S1000 100 1200 150V220H0z' fill='%2362CC86' fill-opacity='.85'/><path d='M0 190C260 150 520 220 760 185S1060 160 1200 190V220H0z' fill='%233FB36E'/></svg>") bottom/100% min(24vh,210px) no-repeat}
+html[data-theme="sky"] .topbar{border:3px solid transparent;border-radius:26px;
+  background:linear-gradient(180deg,var(--g-surf),var(--g-surf2)) padding-box,var(--g-rim) border-box;
+  box-shadow:0 14px 30px -14px var(--g-shadow),0 5px 0 var(--g-lip);backdrop-filter:none}
+html[data-theme="sky"] .crest{background:var(--g-agrad);color:var(--g-atext);border:3px solid rgba(255,255,255,.85);border-radius:18px;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.7),0 5px 0 var(--g-ad),0 10px 18px -6px var(--g-glow);animation:wobble 3.6s ease-in-out infinite}
+html[data-theme="sky"] .brand h1,html[data-theme="sky"] .lobby-head h2,html[data-theme="sky"] .room-card h3,html[data-theme="sky"] .panel h2,html[data-theme="sky"] .rank-heading,html[data-theme="sky"] .modal h3,html[data-theme="sky"] .empty h3,html[data-theme="sky"] .preview-head b{font-family:'Kanit','Mitr',sans-serif}
+html[data-theme="sky"] .brand h1{background:linear-gradient(180deg,var(--g-h1),var(--g-h2));-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700;filter:none}
+html[data-theme="sky"] .brand small{color:var(--g-slate)}
+html[data-theme="sky"] .field{background:var(--g-surf2);color:var(--g-ink);border:2px solid var(--g-line);box-shadow:inset 0 2px 4px rgba(0,0,0,.06)}
+html[data-theme="sky"] .field::placeholder{color:var(--g-slate);opacity:.7}
+html[data-theme="sky"] select.field option{background:var(--g-surf);color:var(--g-ink)}
+html[data-theme="sky"] .field:focus-visible{border-color:var(--g-p2);box-shadow:inset 0 2px 4px rgba(0,0,0,.06),0 0 0 4px var(--g-glow)}
+html[data-theme="sky"] button:focus-visible,html[data-theme="sky"] .card:focus-visible,html[data-theme="sky"] .chip:focus-visible,html[data-theme="sky"] .room-card:focus-visible,html[data-theme="sky"] .gcard:focus-visible{outline:3px solid var(--g-p2);outline-offset:3px}
+html[data-theme="sky"] .btn,html[data-theme="sky"] .iconbtn{background:linear-gradient(180deg,var(--g-surf),var(--g-surf2));color:var(--g-ink);border:2px solid var(--g-line);font-weight:700;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.65),0 4px 0 var(--g-lip),0 10px 16px -8px var(--g-shadow)}
+html[data-theme="sky"] .btn:hover,html[data-theme="sky"] .iconbtn:hover{background:linear-gradient(180deg,var(--g-surf2),var(--g-soft));color:var(--g-ink)}
+html[data-theme="sky"] .btn.gold{background:var(--g-pgrad);color:var(--g-ptext);border-color:rgba(255,255,255,.4);text-shadow:0 1px 0 rgba(0,0,0,.2);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5),inset 0 -3px 0 rgba(0,0,0,.12),0 5px 0 var(--g-pd),0 12px 20px -8px var(--g-glow)}
+html[data-theme="sky"] .btn.gold:hover{background:var(--g-pgrad);filter:brightness(1.08) saturate(1.05);color:var(--g-ptext)}
+html[data-theme="sky"] .btn.on{background:var(--g-agrad);color:var(--g-atext);border-color:rgba(255,255,255,.55);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.65),0 5px 0 var(--g-ad),0 12px 20px -8px var(--g-glow)}
+html[data-theme="sky"] .btn.ghost{background:transparent;box-shadow:0 3px 0 var(--g-lip)}
+html[data-theme="sky"] .btn.danger{background:linear-gradient(180deg,var(--g-surf),var(--g-surf2));color:var(--g-danger);border-color:var(--g-danger)}
+html[data-theme="sky"] .btn.danger:hover{background:var(--g-danger);color:#fff}
+html[data-theme="sky"] .btn.thief{background:linear-gradient(180deg,var(--g-lav),var(--g-surf2));color:var(--g-lavink);border-color:#B792F5;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 4px 0 #8D63D6,0 10px 16px -8px rgba(141,99,214,.5)}
+html[data-theme="sky"] .btn.thief:hover{background:linear-gradient(180deg,#E6D2FF,var(--g-lav));color:var(--g-lavink)}
+html[data-theme="sky"] .btn.thief.on{background:linear-gradient(180deg,#C99BFF,#9B5CFF);color:#fff;border-color:rgba(255,255,255,.45);
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 5px 0 #5B2CA0,0 12px 20px -8px rgba(155,92,255,.6)}
+html[data-theme="sky"] .btn:hover,html[data-theme="sky"] .btn.gold:hover,html[data-theme="sky"] .btn.on:hover,html[data-theme="sky"] .btn.ghost:hover,html[data-theme="sky"] .btn.danger:hover,html[data-theme="sky"] .btn.thief:hover,html[data-theme="sky"] .btn.thief.on:hover,html[data-theme="sky"] .iconbtn:hover{transform:translateY(-3px)}
+html[data-theme="sky"] .btn:active,html[data-theme="sky"] .btn.gold:active,html[data-theme="sky"] .btn.on:active,html[data-theme="sky"] .btn.ghost:active,html[data-theme="sky"] .btn.danger:active,html[data-theme="sky"] .btn.thief:active,html[data-theme="sky"] .btn.thief.on:active,html[data-theme="sky"] .iconbtn:active{transform:translateY(3px)}
+html[data-theme="sky"] .btn:active,html[data-theme="sky"] .iconbtn:active{box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 1px 0 var(--g-lip)}
+html[data-theme="sky"] .btn.gold:active{box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 1px 0 var(--g-pd)}
+html[data-theme="sky"] .btn.on:active{box-shadow:inset 0 2px 0 rgba(255,255,255,.4),0 1px 0 var(--g-ad)}
+html[data-theme="sky"] .iconbtn.off{opacity:.5}
+html[data-theme="sky"] .chipset{background:linear-gradient(180deg,var(--g-soft),var(--g-surf2));border:2px solid var(--g-line);box-shadow:inset 0 2px 5px rgba(0,0,0,.08)}
+html[data-theme="sky"] .chip{color:var(--g-slate)}
+html[data-theme="sky"] .chip:hover{color:var(--g-ink);background:var(--g-surf)}
+html[data-theme="sky"] .chip.on{background:var(--g-agrad);color:var(--g-atext);box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 3px 0 var(--g-ad)}
+html[data-theme="sky"] .chip.minus.on{background:var(--g-pgrad);color:var(--g-ptext);box-shadow:inset 0 2px 0 rgba(255,255,255,.45),0 3px 0 var(--g-pd)}
+html[data-theme="sky"] .syncbtn .dot{border-color:var(--g-surf)}
+html[data-theme="sky"] .admin-tab{color:var(--g-ink)}
+html[data-theme="sky"] #btnCheckwork{background:linear-gradient(180deg,var(--g-lav),var(--g-surf2));color:var(--g-lavink);border-color:var(--g-line)}
+html[data-theme="sky"] #btnCheckwork:hover{background:linear-gradient(180deg,var(--g-surf2),var(--g-soft))}
+html[data-theme="sky"] .admin-badge{background:var(--g-mint);color:var(--g-mintink);border:2px solid var(--g-line)}
+html[data-theme="sky"] .session-btn{color:var(--g-ink);border-color:var(--g-line)}
+html[data-theme="sky"] .session-btn.paused{background:var(--g-mint);color:var(--g-mintink);border-color:var(--g-line);animation:none}
+html[data-theme="sky"] .toolbar{background:linear-gradient(180deg,var(--g-surf),var(--g-surf2));border:2px solid var(--g-line);backdrop-filter:none;
+  box-shadow:0 12px 24px -14px var(--g-shadow),0 4px 0 var(--g-lip)}
+html[data-theme="sky"] .toolbar.group{background:linear-gradient(180deg,var(--g-mint),var(--g-surf2))}
+html[data-theme="sky"] .tool-label{color:var(--g-slate);font-weight:500}
+html[data-theme="sky"] .mode-tag{background:var(--g-agrad);color:var(--g-atext);border:2px solid rgba(255,255,255,.6)}
+html[data-theme="sky"] .heistbar{background:linear-gradient(90deg,var(--g-lav),var(--g-surf2));border:2px solid #B792F5;animation:none;box-shadow:0 4px 0 #8D63D6}
+html[data-theme="sky"] .heistbar .ht{color:var(--g-lavink)}
+html[data-theme="sky"] .heistbar .hs{color:var(--g-slate)}
+html[data-theme="sky"] .heistbar .hs b{color:var(--g-ink)}
+html[data-theme="sky"] .reorder-tip{background:var(--g-agrad);color:var(--g-atext);border:2px solid rgba(255,255,255,.6)}
+html[data-theme="sky"] .reorder-tip b{color:var(--g-atext)}
+html[data-theme="sky"] .lobby-head p{display:inline-block;background:linear-gradient(180deg,var(--g-surf),var(--g-surf2));color:var(--g-slate);border:2px solid var(--g-line);
+  border-radius:999px;padding:7px 22px;box-shadow:0 4px 0 var(--g-lip);font-weight:500}
+html[data-theme="sky"] .lobby-head::after{display:none}
+html[data-theme="sky"] .room-card{border:3px solid transparent;color:var(--g-ink);
+  background:linear-gradient(180deg,var(--g-surf),var(--g-surf2)) padding-box,var(--g-rim) border-box;
+  box-shadow:0 18px 34px -16px var(--g-shadow),0 6px 0 var(--g-lip)}
+html[data-theme="sky"] .room-card::after{display:none}
+html[data-theme="sky"] .room-card:hover{transform:translateY(-8px);box-shadow:0 26px 44px -16px var(--g-shadow),0 6px 0 var(--g-lip),0 0 34px -4px var(--g-glow)}
+html[data-theme="sky"] .room-card:hover .room-icon{animation:wiggle .5s ease}
+html[data-theme="sky"] .room-icon{background:var(--g-agrad);border:3px solid rgba(255,255,255,.85);box-shadow:inset 0 2px 0 rgba(255,255,255,.7),0 5px 0 var(--g-ad),0 10px 16px -6px var(--g-glow)}
+html[data-theme="sky"] .room-card h3{color:var(--g-ink);font-weight:700}
+html[data-theme="sky"] .room-meta{color:var(--g-slate)}
+html[data-theme="sky"] .room-champ{background:linear-gradient(90deg,var(--g-soft),var(--g-surf2));color:var(--g-ink);border:1px solid var(--g-line)}
+html[data-theme="sky"] .room-champ b{color:var(--g-score)}
+html[data-theme="sky"] .new-room{background:linear-gradient(180deg,rgba(255,255,255,.35),rgba(255,255,255,.1));border:3px dashed var(--g-rim1);color:var(--g-ink)}
+html[data-theme="sky"] .new-room:hover{background:var(--g-agrad);border-color:var(--g-ad)}
+html[data-theme="sky"] .new-room b{color:var(--g-ink)}
+html[data-theme="sky"] .new-room:hover b{color:var(--g-atext)}
+html[data-theme="sky"] .card{color:var(--g-ink);border:3px solid transparent;
+  background:linear-gradient(180deg,var(--g-surf2),var(--g-surf)) padding-box,var(--g-rim) border-box;
+  box-shadow:0 14px 26px -14px var(--g-shadow),0 5px 0 var(--g-lip)}
+html[data-theme="sky"] .card:hover{transform:translateY(-6px);box-shadow:0 22px 34px -14px var(--g-shadow),0 5px 0 var(--g-lip),0 0 28px -4px var(--g-glow)}
+html[data-theme="sky"] .card:active{transform:translateY(2px) scale(.98)}
+html[data-theme="sky"] .card-band{background:var(--g-bgrad);color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.2)}
+html[data-theme="sky"] .card-band .no{background:rgba(255,255,255,.92);color:#2A2150;font-weight:700;text-shadow:none}
+html[data-theme="sky"] .card-band .no.top{background:var(--g-agrad);color:var(--g-atext)}
+html[data-theme="sky"] .card-body{background:radial-gradient(130px 90px at 50% 0%,var(--g-soft),transparent 75%)}
+html[data-theme="sky"] .card:has(.no.top){box-shadow:0 0 0 3px var(--g-a2),0 0 26px 2px var(--g-glow),0 14px 26px -14px var(--g-shadow),0 5px 0 var(--g-lip)}
+html[data-theme="sky"] .card:has(.no.top) .card-band{color:var(--g-ptext);
+  background:linear-gradient(105deg,var(--g-p2) 0%,var(--g-p1) 35%,#FFF1C4 50%,var(--g-p1) 65%,var(--g-p2) 100%);background-size:260% 100%;animation:sheen 3.6s linear infinite}
+html[data-theme="sky"] .ava{background:radial-gradient(circle at 38% 30%,#fff,var(--g-soft));box-shadow:0 0 0 3px #fff,0 0 0 5px var(--g-rim1),0 8px 14px -4px var(--g-shadow)}
+html[data-theme="sky"] .score{color:var(--g-score);text-shadow:0 2px 0 rgba(255,255,255,.4);font-variant-numeric:tabular-nums}
+html[data-theme="sky"] .score .unit{color:var(--g-slate);text-shadow:none}
+html[data-theme="sky"] .nm{text-wrap:balance}
+html[data-theme="sky"] .session-badge{background:var(--g-soft);color:var(--g-ink);border:1px solid var(--g-line)}
+html[data-theme="sky"] .gem{background:color-mix(in srgb,var(--g-ink) 16%,transparent)}
+html[data-theme="sky"] .gem.on{background:linear-gradient(180deg,var(--g-a1),var(--g-p2));box-shadow:0 0 8px var(--g-glow)}
+html[data-theme="sky"] .mini{background:color-mix(in srgb,var(--g-ink) 8%,transparent);color:var(--g-slate);border:1px solid var(--g-line)}
+html[data-theme="sky"] .mini:hover{background:var(--g-agrad);color:var(--g-atext)}
+html[data-theme="sky"] .mini.sub:hover{background:var(--g-danger);color:#fff}
+html[data-theme="sky"] .card.readonly:hover{transform:none;box-shadow:0 14px 26px -14px var(--g-shadow),0 5px 0 var(--g-lip)}
+html[data-theme="sky"] .who-card{color:var(--g-ink);border:3px solid transparent;
+  background:linear-gradient(180deg,var(--g-surf2),var(--g-surf)) padding-box,var(--g-rim) border-box;box-shadow:0 5px 0 var(--g-lip)}
+html[data-theme="sky"] .who-card:hover{box-shadow:0 12px 20px -10px var(--g-shadow),0 5px 0 var(--g-lip)}
+html[data-theme="sky"] .gcard{background:var(--g-bgrad);color:#fff;border:3px solid rgba(255,255,255,.55);box-shadow:0 16px 30px -14px var(--g-shadow),0 6px 0 var(--g-lip)}
+html[data-theme="sky"] .gcard:hover{box-shadow:0 24px 40px -14px var(--g-shadow),0 6px 0 var(--g-lip),0 0 30px -4px var(--g-glow)}
+html[data-theme="sky"] .gcard-head .gi{background:rgba(255,255,255,.28);border:2px solid rgba(255,255,255,.7)}
+html[data-theme="sky"] .gcard-head .gn{color:#fff}
+html[data-theme="sky"] .gcard-head .gn small{color:rgba(255,255,255,.85)}
+html[data-theme="sky"] .gcard-head .gs{color:var(--g-a1);text-shadow:0 2px 0 rgba(0,0,0,.25)}
+html[data-theme="sky"] .mchip{background:rgba(255,255,255,.94);color:#2A2150;border:1px solid rgba(255,255,255,.7)}
+html[data-theme="sky"] .gcard.editing .mchip{background:var(--g-soft);border-color:var(--g-a2)}
+html[data-theme="sky"] .gcard.editing .mchip:hover{background:var(--g-a1)}
+html[data-theme="sky"] .gmini{background:rgba(255,255,255,.94);color:#2A2150;border:1px solid rgba(255,255,255,.7)}
+html[data-theme="sky"] .gmini:hover{background:var(--g-a1);color:#2A2150}
+html[data-theme="sky"] .gcard.gpool{background:linear-gradient(180deg,var(--g-soft),var(--g-surf2));color:var(--g-ink);border:3px dashed var(--g-rim1)}
+html[data-theme="sky"] .gcard.gpool .gn,html[data-theme="sky"] .gcard.gpool .gn small{color:var(--g-ink)}
+html[data-theme="sky"] .panel{border:3px solid transparent;
+  background:linear-gradient(180deg,var(--g-surf),var(--g-surf2)) padding-box,var(--g-rim) border-box;
+  box-shadow:0 16px 30px -16px var(--g-shadow),0 5px 0 var(--g-lip)}
+html[data-theme="sky"] .panel h2{color:var(--g-ink);font-weight:700;border-bottom:3px solid;border-image:linear-gradient(90deg,var(--g-rim1),var(--g-rim2),var(--g-rim3)) 1}
+html[data-theme="sky"] .btn-podium-preview{background:var(--g-agrad);color:var(--g-atext);border:2px solid rgba(255,255,255,.6);box-shadow:0 3px 0 var(--g-ad);font-weight:700}
+html[data-theme="sky"] .btn-podium-preview:hover{background:var(--g-pgrad);color:var(--g-ptext)}
+html[data-theme="sky"] .rank-row{border-bottom:2px dashed var(--g-line)}
+html[data-theme="sky"] .rank-row .rp{color:var(--g-score);font-variant-numeric:tabular-nums}
+html[data-theme="sky"] .rank-row.me1 .rn{color:var(--g-score)}
+html[data-theme="sky"] .bar{height:8px;border-radius:8px;background:color-mix(in srgb,var(--g-ink) 12%,transparent)}
+html[data-theme="sky"] .bar i{background:linear-gradient(90deg,var(--g-p2),var(--g-a1))}
+html[data-theme="sky"] .stat{background:linear-gradient(180deg,var(--g-soft),var(--g-surf2));border:1px solid var(--g-line)}
+html[data-theme="sky"] .stat b{color:var(--g-score);font-variant-numeric:tabular-nums}
+html[data-theme="sky"] .stat span{color:var(--g-slate)}
+html[data-theme="sky"] .logline{color:var(--g-slate);border-bottom:1px dashed var(--g-line)}
+html[data-theme="sky"] .logline b{color:var(--g-lavink)}
+html[data-theme="sky"] .empty{background:linear-gradient(180deg,rgba(255,255,255,.45),rgba(255,255,255,.15));border:3px dashed var(--g-rim1)}
+html[data-theme="sky"] .empty h3{color:var(--g-ink)}
+html[data-theme="sky"] .empty p{color:var(--g-slate)}
+html[data-theme="sky"] .podium-stage{background:radial-gradient(440px 280px at 50% 55%,var(--g-glow),transparent 72%)}
+html[data-theme="sky"] .pod .pname,html[data-theme="sky"] .pod.p1 .pname{color:var(--g-ink)}
+html[data-theme="sky"] .pod .pscore{color:var(--g-ink);font-variant-numeric:tabular-nums}
+html[data-theme="sky"] .pod.p1 .pscore{color:var(--g-score);text-shadow:0 2px 0 rgba(255,255,255,.4)}
+html[data-theme="sky"] .pod.p2 .pscore{color:var(--g-slate)}
+html[data-theme="sky"] .pod.p3 .pscore{color:var(--g-p2)}
+html[data-theme="sky"] .pod .prank{color:var(--g-slate)}
+html[data-theme="sky"] .pod .hero{background:radial-gradient(circle at 38% 30%,#fff,var(--g-soft));box-shadow:0 0 0 3px #fff,0 0 0 5px var(--g-rim1),0 10px 16px -4px var(--g-shadow)}
+html[data-theme="sky"] .pod.p1 .hero{box-shadow:0 0 0 3px #fff,0 0 0 7px var(--g-a2),0 0 34px 6px var(--g-glow),0 10px 16px -4px var(--g-shadow)}
+html[data-theme="sky"] .pod .pillar{border:2px solid rgba(255,255,255,.8);border-bottom:0;box-shadow:inset 0 3px 0 rgba(255,255,255,.55),0 14px 24px -12px var(--g-shadow)}
+html[data-theme="sky"] .pod.p1 .pillar{background:linear-gradient(180deg,var(--g-a1),var(--g-a2))}
+html[data-theme="sky"] .pod.p2 .pillar{background:linear-gradient(180deg,#F1F5FF,#B9C6E8)}
+html[data-theme="sky"] .pod.p3 .pillar{background:linear-gradient(180deg,#FFD7B5,#FF9F66)}
+html[data-theme="sky"] .pod .prankname{color:#2A2150}
+html[data-theme="sky"] .pod .medal-badge{color:#2A2150}
+html[data-theme="sky"] .pod.me .pillar{box-shadow:inset 0 0 0 3px var(--g-p2)}
+html[data-theme="sky"] .podium-base{background:var(--g-rim);box-shadow:0 8px 18px -6px var(--g-glow)}
+html[data-theme="sky"] .rank-heading{color:var(--g-ink);font-weight:700}
+html[data-theme="sky"] .stu-topline{background:linear-gradient(180deg,var(--g-surf),var(--g-surf2));border:2px solid var(--g-line);box-shadow:0 4px 0 var(--g-lip)}
+html[data-theme="sky"] .stu-me-tag{color:var(--g-ink)}
+html[data-theme="sky"] .stu-me-tag b{color:var(--g-score)}
+html[data-theme="sky"] .teacher-link a{color:var(--g-slate)}
+html[data-theme="sky"] .preview-box{border:3px solid transparent;
+  background:linear-gradient(180deg,var(--g-surf),var(--g-surf2)) padding-box,var(--g-rim) border-box;
+  box-shadow:0 8px 0 var(--g-lip),0 34px 70px rgba(0,0,0,.35)}
+html[data-theme="sky"] .preview-head b{color:var(--g-ink)}
+html[data-theme="sky"] .preview-tag{color:var(--g-slate)}
+html[data-theme="sky"] .preview-close{background:var(--g-surf);color:var(--g-ink);border:2px solid var(--g-line)}
+html[data-theme="sky"] .preview-close:hover{background:var(--g-danger);color:#fff}
+html[data-theme="sky"] .mask,html[data-theme="sky"] .preview-overlay{background:radial-gradient(900px 600px at 50% 30%,color-mix(in srgb,var(--g-modal1) 55%,transparent),color-mix(in srgb,var(--g-modal2) 85%,transparent))}
+html[data-theme="sky"] .draw{background:radial-gradient(700px 500px at 50% 40%,var(--g-modal1),var(--g-modal2))}
+html[data-theme="sky"] .draw.heistbg{background:radial-gradient(700px 500px at 50% 40%,#6A2FA8,#1B0F3D)}
+html[data-theme="sky"] .draw-inner{color:#F1EEFF}
+html[data-theme="sky"] .modal{color:#F1EEFF;border:3px solid transparent;
+  background:linear-gradient(180deg,var(--g-modal1),var(--g-modal2)) padding-box,var(--g-rim) border-box;
+  box-shadow:0 10px 0 rgba(0,0,0,.25),0 34px 70px rgba(0,0,0,.4)}
+html[data-theme="sky"] .modal h3{color:var(--g-a1);font-weight:700}
+html[data-theme="sky"] .modal .btn{background:linear-gradient(180deg,#fff,#EEF3FF);color:#2A2150;border-color:rgba(255,255,255,.7)}
+html[data-theme="sky"] .modal .btn.gold{background:var(--g-pgrad);color:var(--g-ptext)}
+html[data-theme="sky"] .modal .btn.danger{background:linear-gradient(180deg,#fff,#EEF3FF);color:#D9411E}
+html[data-theme="sky"] .modal .btn.thief{background:linear-gradient(180deg,#F1E4FF,#DCC6FF);color:#4B1B73}
+html[data-theme="sky"] .modal .btn.ghost{background:transparent;color:#F1EEFF;border-color:rgba(255,255,255,.45);box-shadow:none}
+html[data-theme="sky"] .modal .field{background:#fff;color:#2A2150;border-color:rgba(255,255,255,.6)}
+html[data-theme="sky"] .modal .field::placeholder{color:#8A8FB8}
+html[data-theme="sky"] .hint{color:#C3C8F5}
+html[data-theme="sky"] .opt.on{background:var(--g-agrad);color:var(--g-atext);border-color:rgba(255,255,255,.6);box-shadow:inset 0 2px 0 rgba(255,255,255,.6),0 3px 0 var(--g-ad)}
+html[data-theme="sky"] .th-table td:first-child,html[data-theme="sky"] .th-table th:first-child{background:var(--g-modal2)}
+html[data-theme="sky"] .toast,html[data-theme="sky"] .synctip{background:var(--g-modal2);color:#fff;border:2px solid var(--g-a2)}
+html[data-theme="sky"] .banner{background:linear-gradient(135deg,var(--g-modal1),var(--g-modal2));border-color:var(--g-a2)}
+html[data-theme="sky"] .gate{background:var(--g-bg)}
+html[data-theme="sky"] .gate-box{background:linear-gradient(180deg,var(--g-modal1),var(--g-modal2));color:#F1EEFF;border:3px solid var(--g-rim1)}
+html[data-theme="sky"] .chip,html[data-theme="sky"] .chip:not(.on){color:var(--g-slate)}
+html[data-theme="sky"] .chipset .chip.minus:not(.on){color:var(--g-slate)}
+html[data-theme="sky"] .brand h1,html[data-theme="sky"] .lobby-head h2,html[data-theme="sky"] .room-card h3{font-family:'Kanit',sans-serif;font-weight:700;color:#17356B;-webkit-text-stroke:0}
+html[data-theme="sky"] .lobby-head h2{font-size:clamp(28px,3.8vw,48px);line-height:1.35;margin-bottom:18px;text-shadow:3px 3px 0 #FFC53D,6px 6px 0 #FF7A45}
+html[data-theme="sky"] .lobby-head h2 .tt{color:inherit;background:none;filter:none;text-shadow:inherit;-webkit-text-stroke:0}
+html[data-theme="sky"] .lobby-head h2 .tt::after,html[data-theme="sky"] .lobby-head h2::before,html[data-theme="sky"] .lobby-head h2::after{display:none}
+html[data-theme="sky"] .lobby-head h2 .em{animation:none;text-shadow:none;filter:drop-shadow(3px 5px 0 rgba(255,122,69,.45))}
+html[data-theme="sky"] .brand h1{background:none;-webkit-background-clip:border-box;background-clip:border-box;filter:none;font-size:clamp(20px,2vw,25px);padding:0 4px 4px 0;text-shadow:2px 2px 0 #FFC53D,3px 3px 0 #FF7A45}
+html[data-theme="sky"] .room-card h3{font-size:clamp(19px,1.7vw,22px);line-height:1.4;padding-bottom:4px;text-shadow:2px 2px 0 #FFC53D,3px 3px 0 #FF7A45}
+html[data-theme="sky"] .lobby-head p{font-family:'Kanit',sans-serif;font-weight:500;font-size:clamp(15px,1.5vw,18px);color:var(--g-slate)}
+html[data-theme="sky"] .new-room b{font-family:'Kanit',sans-serif;font-weight:700;font-size:18px}
+@media(max-width:600px){html[data-theme="sky"] .lobby-head h2{text-shadow:2px 2px 0 #FFC53D,4px 4px 0 #FF7A45}}
 </style>
 </head>
 <body>
@@ -549,7 +1019,7 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
   <!-- ══ โหมดนักเรียน: หอกิลด์อ่านอย่างเดียว ══ -->
   <section id="viewStuLobby">
     <div class="lobby-head">
-      <h2>🏰 หอกิลด์ — เลือกห้องเรียนของคุณ</h2>
+      <h2><span class="em">🏰</span> <span class="tt">หอกิลด์ — เลือกห้องเรียนของคุณ</span></h2>
       <p>แตะห้องเรียนเพื่อดูอันดับและยศของคุณ</p>
     </div>
     <div class="lobby-grid" id="stuLobbyGrid"></div>
@@ -570,7 +1040,7 @@ textarea.field{min-height:110px;resize:vertical;line-height:1.7}
   <!-- ══ โหมดครู (หลังบ้าน) ══ -->
   <section id="viewLobby" class="hide">
     <div class="lobby-head">
-      <h2>🏰 หอกิลด์ — ห้องเรียนทั้งหมด</h2>
+      <h2><span class="em">🏰</span> <span class="tt">หอกิลด์ — ห้องเรียนทั้งหมด</span></h2>
       <p>เลือกห้องที่จะสอน หรือสร้างห้องใหม่พร้อมใส่รายชื่อนักเรียนได้เลย</p>
     </div>
     <div class="lobby-grid" id="lobbyGrid"></div>
